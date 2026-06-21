@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+*.log
+results.json
+
+# Local planning and internal reports (not tracked)
+agent-dsbench-phased-build-plan (1).md
+archetype-a/phase_0_report.md

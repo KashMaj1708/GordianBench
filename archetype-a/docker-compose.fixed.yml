@@ -1,0 +1,8 @@
+services:
+  upstream-mock:
+    build:
+      context: ./patches/fixed/upstream-mock
+
+  gateway:
+    build:
+      context: ./patches/fixed/gateway

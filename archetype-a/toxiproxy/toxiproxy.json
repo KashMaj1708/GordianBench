@@ -1,0 +1,8 @@
+[
+  {
+    "name": "upstream",
+    "listen": "[::]:8666",
+    "upstream": "upstream-mock:8081",
+    "enabled": true
+  }
+]
