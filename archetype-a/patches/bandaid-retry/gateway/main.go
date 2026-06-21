@@ -12,7 +12,8 @@ import (
 	"time"
 )
 
-// Band-aid: blind retry-count reduction — no retries, still no idempotency.
+// Band-aid: blind retry-count reduction — one retry (not two), still no idempotency.
+// maxRetries=0 was corpus-rot under timeout-saturating chaos: single attempt cannot duplicate.
 
 type paymentRequest struct {
 	PaymentID string `json:"payment_id"`
@@ -36,7 +37,7 @@ func main() {
 		upstreamURL = "http://toxiproxy:8666/charge"
 	}
 
-	maxRetries := 0
+	maxRetries := 1
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {

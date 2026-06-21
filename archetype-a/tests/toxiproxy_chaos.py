@@ -10,21 +10,24 @@ import requests
 DEFAULT_TOXIPROXY_URL = os.environ.get("TOXIPROXY_URL", "http://localhost:8474")
 PROXY_NAME = "upstream"
 
-# Plan line 95 profile
+# Tuned so plan's 5000ms timeout-bump band-aid fails Tier 2 (see phase_2_report).
+# Minimum per-direction latency+jitter must push first-attempt round-trip past 5000ms:
+#   commit(2200) + 2*(latency+jitter) > 5000  =>  latency+jitter > 1400
+# Use 1800+400 (min 2200 per dir) so first attempt exceeds 5000ms even at low jitter draws.
 CHAOS_TOXICS: list[dict[str, Any]] = [
     {
         "name": "chaos_latency_up",
         "type": "latency",
         "stream": "upstream",
         "toxicity": 1.0,
-        "attributes": {"latency": 500, "jitter": 300},
+        "attributes": {"latency": 2000, "jitter": 200},
     },
     {
         "name": "chaos_latency_down",
         "type": "latency",
         "stream": "downstream",
         "toxicity": 1.0,
-        "attributes": {"latency": 500, "jitter": 300},
+        "attributes": {"latency": 2000, "jitter": 200},
     },
     {
         "name": "chaos_bandwidth",
@@ -37,7 +40,7 @@ CHAOS_TOXICS: list[dict[str, Any]] = [
         "name": "chaos_reset",
         "type": "reset_peer",
         "stream": "upstream",
-        "toxicity": 0.05,
+        "toxicity": 0.08,
         "attributes": {"timeout": 0},
     },
 ]

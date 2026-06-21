@@ -83,6 +83,14 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
+    # Tier 1 runs on calm stack — clear any leftover Tier 2 toxics.
+    try:
+        from tests.toxiproxy_chaos import clear_chaos
+
+        clear_chaos()
+    except Exception:
+        pass
+
     result = run_gate(
         runs=args.runs,
         expect_pass=args.expect_pass,

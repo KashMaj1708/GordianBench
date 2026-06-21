@@ -17,6 +17,7 @@ htmlcov/
 *.log
 results.json
 tier*_gate_*.json
+tier2_chaos_trace.jsonl
 
 # Local planning and internal docs (not tracked)
 agent-dsbench-phased-build-plan (1).md

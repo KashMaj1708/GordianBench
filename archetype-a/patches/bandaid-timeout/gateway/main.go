@@ -26,7 +26,7 @@ type paymentResponse struct {
 }
 
 func main() {
-	clientTimeout := 2600 * time.Millisecond
+	clientTimeout := 5000 * time.Millisecond
 	if ms := os.Getenv("CLIENT_TIMEOUT_MS"); ms != "" {
 		if parsed, err := strconv.Atoi(ms); err == nil {
 			clientTimeout = time.Duration(parsed) * time.Millisecond
