@@ -1,0 +1,5 @@
+services:
+  gateway:
+    image: archetype-a-gateway:bandaid-retry
+    build:
+      context: ./patches/bandaid-retry/gateway

@@ -1,0 +1,16 @@
+services:
+  tier1-runner:
+    build:
+      context: .
+      dockerfile: tier1-runner/Dockerfile
+    environment:
+      GATEWAY_URL: http://gateway:8080
+      DATABASE_URL: postgres://bench:bench@postgres:5432/payments?sslmode=disable
+      TOXIPROXY_URL: http://toxiproxy:8474
+    depends_on:
+      gateway:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    profiles:
+      - tier1

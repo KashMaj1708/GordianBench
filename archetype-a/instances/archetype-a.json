@@ -1,0 +1,22 @@
+{
+  "instance_id": "agent-dsbench__archetype-a__cascading-retry",
+  "repo": "local/archetype-a",
+  "base_commit": "phase0-broken",
+  "problem_statement": "Payment gateway retries upstream on client timeout without idempotency, causing duplicate ledger charges when upstream commit latency exceeds the gateway timeout.",
+  "FAIL_TO_PASS": [
+    "tier1_regression_test.py::test_payment_charged_exactly_once"
+  ],
+  "PASS_TO_PASS": [
+    "tier1_regression_test.py::test_gateway_health",
+    "tier1_regression_test.py::test_rejects_invalid_payment_payload"
+  ],
+  "test_cmd": "pytest tier1_regression_test.py -v",
+  "tier2_test": "tier2_chaos_test.py::test_payment_survives_chaos",
+  "metadata": {
+    "archetype": "A",
+    "causal_distance": 2,
+    "client_timeout_ms": 2000,
+    "commit_latency_ms": 2200,
+    "tier2_hidden": true
+  }
+}

@@ -1,0 +1,7 @@
+services:
+  gateway:
+    image: archetype-a-gateway:bandaid-timeout
+    build:
+      context: ./patches/bandaid-timeout/gateway
+    environment:
+      CLIENT_TIMEOUT_MS: "2600"

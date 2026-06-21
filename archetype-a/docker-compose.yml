@@ -16,6 +16,7 @@ services:
       retries: 15
 
   upstream-mock:
+    image: archetype-a-upstream-mock:broken
     build:
       context: ./src/upstream-mock
     environment:
@@ -43,6 +44,7 @@ services:
         condition: service_healthy
 
   gateway:
+    image: archetype-a-gateway:broken
     build:
       context: ./src/gateway
     environment:

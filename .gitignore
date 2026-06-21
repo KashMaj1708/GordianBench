@@ -1,3 +1,4 @@
+# Python
 .venv/
 __pycache__/
 *.py[cod]
@@ -5,10 +6,20 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets and local env
 .env
+.env.*
+
+# Logs and gate run output
 *.log
 results.json
+tier*_gate_*.json
 
-# Local planning and internal reports (not tracked)
+# Local planning and internal docs (not tracked)
 agent-dsbench-phased-build-plan (1).md
-archetype-a/phase_0_report.md
+archetype-a/phase_*_report.md
+archetype-a/PHASE*.md
+archetype-a/patches/BANDAID_CORPUS.md

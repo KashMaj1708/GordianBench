@@ -1,0 +1,5 @@
+services:
+  gateway:
+    image: archetype-a-gateway:bandaid-rewrite
+    build:
+      context: ./patches/bandaid-rewrite/gateway

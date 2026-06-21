@@ -76,3 +76,37 @@ docker compose -f docker-compose.yml -f docker-compose.fixed.yml up -d --build
 docker compose down
 docker compose up -d --build
 ```
+
+## Phase 1 — Tier 1 regression gate
+
+```powershell
+# Host runner (stack must be up)
+$env:GATEWAY_URL="http://localhost:8080"
+$env:DATABASE_URL="postgresql://bench:bench@localhost:5433/payments"
+..\.venv\Scripts\python.exe -m pytest tier1_regression_test.py -v
+
+# In-container runner
+docker compose -f docker-compose.yml -f docker-compose.tier1.yml run --rm tier1-runner
+
+# Determinism gates (10 runs, zero flips)
+..\.venv\Scripts\python.exe scripts\run_tier1_gate.py --runs 10 --host
+..\.venv\Scripts\python.exe scripts\run_tier1_gate.py --runs 10 --expect-pass --host  # after fixed deploy
+```
+
+See `PHASE1_NOTES.md` for verification results and `instances/archetype-a.json` for SWE-bench F2P/P2P mapping.
+
+## Phase 2 — Tier 2 chaos crucible
+
+```powershell
+$env:TOXIPROXY_URL="http://localhost:8474"
+
+# Single run (stack must be up; fixed variant for pass)
+docker compose -f docker-compose.yml -f docker-compose.fixed.yml up -d --build
+..\.venv\Scripts\python.exe -m pytest tier2_chaos_test.py -v
+
+# Determinism gates (10 runs, zero flips)
+..\.venv\Scripts\python.exe scripts\run_tier2_gate.py --variant fixed --expect-pass --runs 10 --host
+..\.venv\Scripts\python.exe scripts\run_tier2_gate.py --variant bandaid-timeout --runs 10 --host
+```
+
+See `PHASE2_NOTES.md` and `patches/BANDAID_CORPUS.md` for band-aid corpus and chaos profile.

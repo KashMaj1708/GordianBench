@@ -1,8 +1,10 @@
 services:
   upstream-mock:
+    image: archetype-a-upstream-mock:fixed
     build:
       context: ./patches/fixed/upstream-mock
 
   gateway:
+    image: archetype-a-gateway:fixed
     build:
       context: ./patches/fixed/gateway
