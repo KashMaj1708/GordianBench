@@ -19,7 +19,10 @@ results.json
 tier*_gate_*.json
 tier2_chaos_trace.jsonl
 
-# Local planning and internal docs (not tracked)
+# Ephemeral patch workspaces (grade_patch)
+archetype-a/.grade-workspaces/
+archetype-a/live_agent_runs/
+.venv-wsl/
 agent-dsbench-phased-build-plan (1).md
 archetype-a/phase_*_report.md
 archetype-a/PHASE*.md

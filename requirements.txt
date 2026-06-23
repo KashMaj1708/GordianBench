@@ -18,6 +18,8 @@ testcontainers==4.14.2
 requests==2.34.2
 httpx==0.28.1
 anthropic==0.111.0
+openai==1.109.1
+google-genai==1.52.0
 numpy==2.2.6
 scipy==1.15.3
 docker==7.1.0

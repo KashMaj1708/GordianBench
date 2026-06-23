@@ -1,0 +1,117 @@
+diff --git a/src/gateway/main.go b/src/gateway/main.go
+index 3b31a31..e8cc8b6 100644
+--- a/src/gateway/main.go
++++ b/src/gateway/main.go
+@@ -75,6 +75,7 @@ func main() {
+ 				return
+ 			}
+ 			httpReq.Header.Set("Content-Type", "application/json")
++			httpReq.Header.Set("Idempotency-Key", req.PaymentID)
+ 
+ 			resp, err := client.Do(httpReq)
+ 			if err != nil {
+@@ -108,7 +109,7 @@ func main() {
+ 
+ 	addr := ":8080"
+ 	log.Printf(
+-		"gateway listening on %s (client_timeout=%s upstream=%s)",
++		"gateway (fixed) listening on %s (client_timeout=%s upstream=%s)",
+ 		addr, clientTimeout, upstreamURL,
+ 	)
+ 	if err := http.ListenAndServe(addr, mux); err != nil {
+diff --git a/src/upstream-mock/main.go b/src/upstream-mock/main.go
+index 141abbf..9372119 100644
+--- a/src/upstream-mock/main.go
++++ b/src/upstream-mock/main.go
+@@ -18,8 +18,34 @@ type chargeRequest struct {
+ }
+ 
+ type chargeResponse struct {
+-	Status   string `json:"status"`
+-	LedgerID int64  `json:"ledger_id,omitempty"`
++	Status    string `json:"status"`
++	LedgerID  int64  `json:"ledger_id,omitempty"`
++	Duplicate bool   `json:"duplicate,omitempty"`
++}
++
++func lookupExisting(db *sql.DB, idempotencyKey string) (int64, bool) {
++	var existingID int64
++	err := db.QueryRow(
++		`SELECT id FROM ledger WHERE idempotency_key = $1`,
++		idempotencyKey,
++	).Scan(&existingID)
++	if err == nil {
++		return existingID, true
++	}
++	if err != sql.ErrNoRows {
++		log.Printf("idempotency lookup failed: %v", err)
++	}
++	return 0, false
++}
++
++func writeOK(w http.ResponseWriter, ledgerID int64, duplicate bool) {
++	w.Header().Set("Content-Type", "application/json")
++	w.WriteHeader(http.StatusOK)
++	_ = json.NewEncoder(w).Encode(chargeResponse{
++		Status:    "ok",
++		LedgerID:  ledgerID,
++		Duplicate: duplicate,
++	})
+ }
+ 
+ func main() {
+@@ -72,30 +98,48 @@ func main() {
+ 			return
+ 		}
+ 
+-		// Simulate slow upstream commit (Postgres write completes after delay).
++		idempotencyKey := r.Header.Get("Idempotency-Key")
++		if idempotencyKey == "" {
++			http.Error(w, "missing Idempotency-Key", http.StatusBadRequest)
++			return
++		}
++
++		if existingID, ok := lookupExisting(db, idempotencyKey); ok {
++			writeOK(w, existingID, true)
++			return
++		}
++
+ 		time.Sleep(commitLatency)
+ 
++		if existingID, ok := lookupExisting(db, idempotencyKey); ok {
++			writeOK(w, existingID, true)
++			return
++		}
++
+ 		var ledgerID int64
+ 		err := db.QueryRow(
+ 			`INSERT INTO ledger (payment_id, amount, idempotency_key)
+-			 VALUES ($1, $2, NULL)
++			 VALUES ($1, $2, $3)
+ 			 RETURNING id`,
+ 			req.PaymentID,
+ 			req.Amount,
++			idempotencyKey,
+ 		).Scan(&ledgerID)
+ 		if err != nil {
++			if existingID, ok := lookupExisting(db, idempotencyKey); ok {
++				writeOK(w, existingID, true)
++				return
++			}
+ 			log.Printf("ledger insert failed: %v", err)
+ 			http.Error(w, "internal error", http.StatusInternalServerError)
+ 			return
+ 		}
+ 
+-		w.Header().Set("Content-Type", "application/json")
+-		w.WriteHeader(http.StatusOK)
+-		_ = json.NewEncoder(w).Encode(chargeResponse{Status: "ok", LedgerID: ledgerID})
++		writeOK(w, ledgerID, false)
+ 	})
+ 
+ 	addr := ":8081"
+-	log.Printf("upstream-mock listening on %s (commit_latency=%s)", addr, commitLatency)
++	log.Printf("upstream-mock (fixed) listening on %s (commit_latency=%s)", addr, commitLatency)
+ 	if err := http.ListenAndServe(addr, mux); err != nil {
+ 		log.Fatal(err)
+ 	}
