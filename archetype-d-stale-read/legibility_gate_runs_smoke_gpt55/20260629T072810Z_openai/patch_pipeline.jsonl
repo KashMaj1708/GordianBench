@@ -1,0 +1,7 @@
+{"ts": 1782718049.087, "stage": "submit_attempt", "run": "openai/gpt-5.5", "turn": 12, "tool_call_id": "call_Lkw2XIckndcBp1Z0AUh5RVcX", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782718050.974, "stage": "content_check", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "byte_len": 6855, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 5, "last_120_chars": "rintf(\"ledger-api listening on %s (fallback pin ttl %dms)\", addr, ttlMS)\n \tlog.Fatal(http.ListenAndServe(addr, mux))\n }\n", "ok": true}
+{"ts": 1782718057.648, "stage": "git_apply", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782718057.648, "stage": "extraction", "run": "openai/gpt-5.5", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782718084.939, "stage": "build", "run": "openai/gpt-5.5", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782718084.939, "stage": "accepted", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "byte_len": 6855}
+{"ts": 1782718084.939, "stage": "usage", "run": "openai/gpt-5.5", "input_tokens": 53487, "output_tokens": 9875, "cache_read_input_tokens": 30720, "cache_creation_input_tokens": 0}

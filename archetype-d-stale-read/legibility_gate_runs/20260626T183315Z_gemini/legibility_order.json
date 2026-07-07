@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs\\20260626T183315Z_gemini",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'stale read' (stale-read) at event 1, before first successful runtime probe at event 30",
+  "diagnosis_ordinal": 1,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "stale read",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 30,
+  "first_probe_cmd": "#!/bin/bash\nset -euo pipefail\n\n# Hardcoded URLs as a workaround for env var issues.\nAPI_URL=\"http://ledger-api:8080\"\nPRIMARY_URL=\"postgresql://bench:bench@postgres-primary:5432/ledger\"\nREPLICA_URL=\"postgresql://bench:bench@postgres-replica:5432/ledger\"\n\necho \"Running reproduction loop...\"\nfor i in {1..20}; do\n  acct_id=\"acct-repro-$(date +%s)-${i}\"\n\n  # Create account with balance 0\n  psql \"$PRIMARY_URL\" -c \"INSERT INTO accounts (id, balance_cents) VALUES ('${acct_id}', 0);\" >/dev/null\n\n  # Deposit 100 cents\n  curl -s -X POST \"${API_URL}/deposit\" \\\n    -H \"Content-Type: application/json\" \\\n    -d \"{\\\"account\\\": \\\"${acct_id}\\\", \\\"amount_cents\\\": 100}\" >/dev/null\n\n  # Immediately read balance\n  read_body=$(curl -s \"${API_URL}/balance?account=${acct_id}\")\n  \n  # Parse JSON with grep/cut instead of jq\n  balance=$(echo \"$read_body\" | grep -o '\"balance_cents\":[0-9]*' | cut -d: -f2)\n  source=$(echo \"$read_body\" | grep -o '\"source\":\"[^\"]*\"' | cut -d: -f2 | tr -d '\"')\n\n  if [[ \"$balance\" -ne 100 ]]; then\n    echo \"!!! Inconsistency detected for ${acct_id}: balance is ${balance} (from ${source}) !!!\"\n    primary_bal=$(psql -qAt \"$PRIMARY_URL\" -c \"SELECT balance_cents from accounts where id = '${acct_id}';\")\n    replica_bal=$(psql -qAt \"$REPLICA_URL\" -c \"SELECT balance_cents from accounts where id = '${acct_id}';\")\n    echo \"  - Direct DB check: primary=${primary_bal}, replica=${replica_bal}\"\n  else\n    echo \"OK for ${acct_id}: balance is 100 (from ${source}).\"\n  fi\ndone\n",
+  "probe_attempts": 10,
+  "probe_successes": 3,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

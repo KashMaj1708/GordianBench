@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T173515Z_openai",
+  "verdict": "NO_DIAGNOSIS",
+  "test2": "N/A",
+  "reason": "no named root cause in assistant text",
+  "diagnosis_ordinal": null,
+  "diagnosis_class": null,
+  "diagnosis_term": null,
+  "diagnosis_role": null,
+  "first_probe_ordinal": 6,
+  "first_probe_cmd": "getent hosts ledger-api; curl -s $API_URL/health; echo; python3 - <<'PY'\nimport os,requests,time,random\nurl=os.environ['API_URL']\nacct='acct-1'\n# get initial\nprint(requests.get(url+'/balance',params={'account':acct}).json())\nfor i in range(20):\n    amt=1\n    d=requests.post(url+'/deposit',json={'account':acct,'amount_cents':amt})\n    if d.status_code!=200:\n        print('deposit err',d.status_code,d.text); break\n    dj=d.json()\n    b=requests.get(url+'/balance',params={'account':acct})\n    print(i,dj,b.status_code,b.text.strip())\n    time.sleep(0.05)\nPY",
+  "probe_attempts": 2,
+  "probe_successes": 2,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

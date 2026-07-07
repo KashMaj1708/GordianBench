@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gemini-2.5-pro\\20260701T051159Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (4 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 578,
+  "investigated": true,
+  "disambiguating_probes": 4,
+  "first_observation_ordinal": 6,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# Script to reproduce the bug\nACCOUNT_ID=\"acct-repro-$$\"\n\n# Initialize account in the primary DB.\npsql $PRIMARY_URL -c \"INSERT INTO accounts (id, balance_cents)",
+  "first_edit_ordinal": 20,
+  "observation_precedes_fix": true
+}

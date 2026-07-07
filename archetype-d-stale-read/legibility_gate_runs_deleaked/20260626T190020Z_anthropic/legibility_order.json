@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_deleaked\\20260626T190020Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 15 precedes named diagnosis at event 20",
+  "diagnosis_ordinal": 20,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 15,
+  "first_probe_cmd": "\n# Check the database structure and initialize an account\npsql \"$PRIMARY_URL\" -c \"CREATE TABLE IF NOT EXISTS accounts (id TEXT PRIMARY KEY, balance_cents INT64 DEFAULT 0)\" 2>&1 || echo \"Table may already exist\"\n",
+  "probe_attempts": 10,
+  "probe_successes": 10,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

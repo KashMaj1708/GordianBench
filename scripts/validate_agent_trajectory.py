@@ -57,7 +57,17 @@ def main() -> int:
             ),
             AssistantTurn(
                 tool_calls=[
-                    ToolCall(id="t3", name="submit_patch", input={"model_patch": patch}),
+                    ToolCall(
+                        id="t3",
+                        name="write_file",
+                        input={"path": "model_patch.diff", "content": patch},
+                    ),
+                ],
+                stop_reason=StopReason.WANTS_TOOL,
+            ),
+            AssistantTurn(
+                tool_calls=[
+                    ToolCall(id="t4", name="submit_patch", input={}),
                 ],
                 stop_reason=StopReason.WANTS_TOOL,
             ),
@@ -68,8 +78,10 @@ def main() -> int:
         executor = ToolExecutor(
             config=ExecutorConfig(
                 workspace_root=workspace.src_root,
+                repo_root=workspace.root,
                 gateway_url=session.gateway_url,
                 database_url=session.database_url,
+                spec=session.spec,
             )
         )
         result = run_agent_loop(

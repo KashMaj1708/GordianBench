@@ -1,0 +1,5 @@
+{"ts": 1782520755.331, "stage": "submit_attempt", "run": "gemini/gemini-2.5-pro", "turn": 3, "tool_call_id": "gemini_13cdcf2ad484", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782520757.152, "stage": "content_check", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 1284, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 3, "last_120_chars": " s.primary.QueryRow(\n \t\t\"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents\",\n", "ok": true}
+{"ts": 1782520758.089, "stage": "git_apply", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782520758.089, "stage": "extraction", "run": "gemini/gemini-2.5-pro", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782520758.089, "stage": "accepted", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 1284}

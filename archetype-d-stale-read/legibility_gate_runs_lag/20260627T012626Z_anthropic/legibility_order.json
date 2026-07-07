@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T012626Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 17 precedes named diagnosis at event 29",
+  "diagnosis_ordinal": 29,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 17,
+  "first_probe_cmd": "\npsql \"$PRIMARY_URL\" -c \"\\dt\"\n",
+  "probe_attempts": 8,
+  "probe_successes": 8,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

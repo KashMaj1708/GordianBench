@@ -1,0 +1,23 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..3aa840c 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -19,7 +19,7 @@ import (
+ // offload the primary.
+ type readWritePin struct {
+ 	mu  sync.Mutex
+-	ttl time.Duration
++	tl time.Duration
+ 	exp map[string]time.Time
+ }
+ 
+@@ -76,6 +76,9 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Ensure the primary connection is fully flushed before returning and marking the client for pin.
++	s.primary.Exec("SELECT 1")
++
+ 	// Client just wrote this account; serve its reads from the primary briefly.
+ 	s.pin.mark(req.Account)
+ 

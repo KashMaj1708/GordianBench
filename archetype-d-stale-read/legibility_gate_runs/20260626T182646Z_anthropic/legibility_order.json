@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs\\20260626T182646Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 23 precedes named diagnosis at event 29",
+  "diagnosis_ordinal": 29,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 23,
+  "first_probe_cmd": "\n# Test by directly depositing and reading to reproduce the bug\nPRIMARY_URL=\"postgresql://bench:bench@postgres-primary:5432/ledger\"\nREPLICA_URL=\"postgresql://bench:bench@postgres-replica:5432/ledger\"\n\n# First, check if account exists\npsql \"$PRIMARY_URL\" -c \"SELECT id, balance_cents FROM accounts WHERE id = 'test-acct-1' LIMIT 1;\"\n",
+  "probe_attempts": 6,
+  "probe_successes": 5,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

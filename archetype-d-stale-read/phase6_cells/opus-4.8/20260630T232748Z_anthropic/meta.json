@@ -1,0 +1,13 @@
+{
+  "gate": "archetype-d-stale-read-legibility",
+  "provider": "anthropic",
+  "model": "claude-opus-4-8",
+  "turns_used": 12,
+  "patch_bytes": 5979,
+  "patch_source": "workspace_git_diff",
+  "patch_death_stage": null,
+  "patch_reapplies": true,
+  "chaos_mode": "lag",
+  "chaos_lag_ms": 20000,
+  "build_check": true
+}

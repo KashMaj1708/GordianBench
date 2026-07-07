@@ -1,0 +1,2 @@
+{"ts": 1782524297.983, "stage": "extraction", "run": "openai/gpt-4.1", "tried": ["workspace_git_diff", "workspace_patch_file"], "resolved_from": null, "workspace_files_present": []}
+{"ts": 1782524297.983, "stage": "auto_submit", "run": "openai/gpt-4.1", "ok": false, "reason": "no workspace edits and no patch file"}

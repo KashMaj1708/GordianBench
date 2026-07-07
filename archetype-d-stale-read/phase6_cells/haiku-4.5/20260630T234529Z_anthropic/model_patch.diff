@@ -1,0 +1,40 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..f35079b 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -66,6 +66,10 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Mark account as pinned BEFORE the write to ensure any concurrent reads
++	// during the write will see the updated value from primary
++	s.pin.mark(req.Account)
++
+ 	var balance int64
+ 	err := s.primary.QueryRow(
+ 		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
+@@ -76,9 +80,6 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
+-
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+ 		"balance_cents": balance,
+@@ -101,10 +102,10 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
++	if err != nil && source == "replica" {
++		// Replica read path unavailable; fall back to the primary.
++		source = "primary"
++		balance, err = readBalance(s.primary, account)
+ 	}
+ 	if err != nil {
+ 		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)

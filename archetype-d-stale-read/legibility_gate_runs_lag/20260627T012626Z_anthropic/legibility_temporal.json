@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T012626Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (BANDAID: ttl_bump); investigated (6 disambiguating probe(s))",
+  "fix_mechanism": "BANDAID",
+  "fix_evidence": "ttl_bump",
+  "correctness_basis": null,
+  "delivered_bytes": 388,
+  "investigated": true,
+  "disambiguating_probes": 6,
+  "first_observation_ordinal": 14,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# Verify API is running\ncurl -s http://ledger-api:8080/health\n\necho \"\"\necho \"Testing deposit and balance:\"\n\n# Do a deposit\ncurl -s -X POST http://ledger-api:808",
+  "first_edit_ordinal": 50,
+  "observation_precedes_fix": true
+}

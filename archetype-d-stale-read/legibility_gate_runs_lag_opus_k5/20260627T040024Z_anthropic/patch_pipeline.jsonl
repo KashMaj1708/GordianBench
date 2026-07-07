@@ -1,0 +1,6 @@
+{"ts": 1782532810.199, "stage": "submit_attempt", "run": "anthropic/claude-opus-4-8", "turn": 8, "tool_call_id": "toolu_01S4a6ry4xZ3kqBJNy8puKE5", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782532812.313, "stage": "content_check", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 1902, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": "ead path unavailable; fall back to the replica.\n \t\tsource = \"replica\"\n \t\tbalance, err = readBalance(s.replica, account)\n", "ok": true}
+{"ts": 1782532819.414, "stage": "git_apply", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782532819.414, "stage": "extraction", "run": "anthropic/claude-opus-4-8", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782532819.414, "stage": "accepted", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 1902}
+{"ts": 1782532819.414, "stage": "usage", "run": "anthropic/claude-opus-4-8", "input_tokens": 16, "output_tokens": 3977, "cache_read_input_tokens": 36381, "cache_creation_input_tokens": 9674}

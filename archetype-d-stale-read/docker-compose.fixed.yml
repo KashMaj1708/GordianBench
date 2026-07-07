@@ -1,0 +1,5 @@
+services:
+  ledger-api:
+    image: archetype-d-stale-read-ledger-api:fixed
+    build:
+      context: ./src-fixed/ledger-api

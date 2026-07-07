@@ -1,0 +1,5 @@
+{"ts": 1782500996.487, "stage": "submit_attempt", "run": "openai/gpt-4.1", "turn": 16, "tool_call_id": "call_bftxPgsV1NZIeRO6bEs5ya6o", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782500998.468, "stage": "content_check", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 473, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 1, "last_120_chars": "5000\n \tif v := os.Getenv(\"PIN_TTL_MS\"); v != \"\" {\n \t\tif parsed, err := strconv.Atoi(v); err == nil {\n \t\t\tttlMS = parsed\n", "ok": true}
+{"ts": 1782500999.314, "stage": "git_apply", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782500999.314, "stage": "extraction", "run": "openai/gpt-4.1", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782500999.314, "stage": "accepted", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 473}

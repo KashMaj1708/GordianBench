@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234852Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 15 precedes named diagnosis at event 28",
+  "diagnosis_ordinal": 28,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 15,
+  "first_probe_cmd": "\n# Check the database schema\npsql -h postgres-primary -U bench -d ledger -c \"\\d accounts\" 2>/dev/null || echo \"Connection failed\"\n",
+  "probe_attempts": 10,
+  "probe_successes": 10,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

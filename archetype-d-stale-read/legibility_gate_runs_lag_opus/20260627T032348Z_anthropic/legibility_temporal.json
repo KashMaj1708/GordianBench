@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus\\20260627T032348Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (read_your_writes) at event 8 precedes first edit at event 18",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "LSN catch-up SQL: 'pg_last_wal_replay_lsn'",
+  "correctness_basis": "LSN (canonical)",
+  "delivered_bytes": 6428,
+  "investigated": true,
+  "disambiguating_probes": 5,
+  "first_observation_ordinal": 8,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "set -e\nACC=acct-1\n# deposit then immediately read repeatedly to observe lag\ncurl -s -XPOST \"$API_URL/deposit\" -d '{\"account\":\"'$ACC'\",\"amount_cents\":100}'; echo",
+  "first_edit_ordinal": 18,
+  "observation_precedes_fix": true
+}

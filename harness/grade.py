@@ -6,10 +6,10 @@ import os
 import subprocess
 import sys
 
+from harness.archetype_spec import ArchetypeSpec, default_spec
 from harness.cleanup import ensure_clean_state
 from harness.hygiene import assert_resource_hygiene, list_active_toxics
 from harness.lifecycle import (
-    ARCHETYPE_ROOT,
     PatchStackSession,
     StackSession,
     patch_session,
@@ -27,16 +27,22 @@ PATCH_VARIANTS = {
 
 
 def _env_for_session(session: StackSession | PatchStackSession) -> dict[str, str]:
+    spec = session.spec
     env = os.environ.copy()
+    env[spec.api_url_env] = session.gateway_url
     env["GATEWAY_URL"] = session.gateway_url
+    env["API_URL"] = session.gateway_url
     env["DATABASE_URL"] = session.database_url
-    env["TOXIPROXY_URL"] = session.toxiproxy_url
-    env["PYTHONPATH"] = str(ARCHETYPE_ROOT)
+    if session.toxiproxy_url:
+        env["TOXIPROXY_URL"] = session.toxiproxy_url
+    env["PYTHONPATH"] = str(spec.root)
     return env
 
 
-def _clear_toxics() -> None:
-    sys.path.insert(0, str(ARCHETYPE_ROOT))
+def _clear_toxics(spec: ArchetypeSpec) -> None:
+    if not spec.toxiproxy_url:
+        return
+    sys.path.insert(0, str(spec.root))
     try:
         from tests.toxiproxy_chaos import clear_chaos
 
@@ -46,70 +52,100 @@ def _clear_toxics() -> None:
 
 
 def run_tier1(session: StackSession | PatchStackSession) -> bool:
-    _clear_toxics()
-    if list_active_toxics(session.toxiproxy_url):
+    spec = session.spec
+    _clear_toxics(spec)
+    if session.toxiproxy_url and list_active_toxics(session.toxiproxy_url):
         return False
-    cmd = [sys.executable, "-m", "pytest", "tier1_regression_test.py", "-q"]
-    proc = subprocess.run(cmd, cwd=ARCHETYPE_ROOT, env=_env_for_session(session))
+    cmd = [sys.executable, "-m", "pytest", spec.tier1_pytest_target, "-q"]
+    proc = subprocess.run(cmd, cwd=spec.root, env=_env_for_session(session))
     return proc.returncode == 0
 
 
 def run_tier2(session: StackSession | PatchStackSession) -> bool:
-    cmd = [sys.executable, "-m", "pytest", "tier2_chaos_test.py", "-q"]
-    proc = subprocess.run(cmd, cwd=ARCHETYPE_ROOT, env=_env_for_session(session))
-    _clear_toxics()
+    spec = session.spec
+    cmd = [sys.executable, "-m", "pytest", spec.tier2_pytest_target, "-q"]
+    proc = subprocess.run(cmd, cwd=spec.root, env=_env_for_session(session))
+    _clear_toxics(spec)
     return proc.returncode == 0
 
 
-def _finalize_hygiene(*, teardown: bool) -> None:
+def _finalize_hygiene(*, teardown: bool, spec: ArchetypeSpec) -> None:
     if teardown:
-        _clear_toxics()
+        _clear_toxics(spec)
     hygiene = assert_resource_hygiene(allow_running_stack=not teardown)
     if not hygiene.ok and teardown:
         raise RuntimeError(f"resource leak after grade: {hygiene.to_dict()}")
 
 
-def grade(variant: str, *, teardown: bool = True) -> float:
+def grade(variant: str, *, spec: ArchetypeSpec | None = None, teardown: bool = True) -> float:
     """
     Return 1.0 iff Tier 1 and Tier 2 both pass for a frozen corpus variant.
-
-    Phase 3 path: selects pre-built compose overlay from VARIANT_COMPOSE.
     """
-    if variant not in PATCH_VARIANTS:
+    s = spec or default_spec()
+    if variant not in s.variant_compose:
         raise ValueError(f"unknown variant: {variant}")
 
     ensure_clean_state()
     try:
-        with stack_session(variant) as session:
+        with stack_session(variant, spec=s) as session:
             if not run_tier1(session):
                 return 0.0
             if not run_tier2(session):
                 return 0.0
             return 1.0
     finally:
-        _finalize_hygiene(teardown=teardown)
+        _finalize_hygiene(teardown=teardown, spec=s)
 
 
-def grade_patch(model_patch: str, *, teardown: bool = True) -> float:
+def grade_patch(
+    model_patch: str,
+    *,
+    spec: ArchetypeSpec | None = None,
+    teardown: bool = True,
+) -> float:
     """
     Return 1.0 iff Tier 1 and Tier 2 both pass for an arbitrary git diff.
-
-    Phase 4 path: git apply → content-hash rebuild → same oracle as grade(variant).
-    This is the path the agent will exercise; grade(variant) validates the oracle only.
     """
+    s = spec or default_spec()
     if not model_patch or not model_patch.strip():
         raise ValueError("model_patch is empty")
 
-    from agent.patch_util import sanitize_model_patch
+    from agent.patch_util import repair_model_patch
 
-    model_patch = sanitize_model_patch(model_patch)
+    model_patch = repair_model_patch(model_patch)
     ensure_clean_state()
     try:
-        with patch_session(model_patch) as session:
+        with patch_session(model_patch, spec=s) as session:
             if not run_tier1(session):
                 return 0.0
             if not run_tier2(session):
                 return 0.0
             return 1.0
     finally:
-        _finalize_hygiene(teardown=teardown)
+        _finalize_hygiene(teardown=teardown, spec=s)
+
+
+def grade_patch_tier(
+    model_patch: str,
+    tier: int,
+    *,
+    spec: ArchetypeSpec | None = None,
+    teardown: bool = True,
+) -> float:
+    """Return 1.0 iff the given tier passes for an arbitrary git diff (informational)."""
+    s = spec or default_spec()
+    if tier not in (1, 2):
+        raise ValueError("tier must be 1 or 2")
+    if not model_patch or not model_patch.strip():
+        raise ValueError("model_patch is empty")
+
+    from agent.patch_util import repair_model_patch
+
+    model_patch = repair_model_patch(model_patch)
+    ensure_clean_state()
+    try:
+        with patch_session(model_patch, spec=s) as session:
+            ok = run_tier1(session) if tier == 1 else run_tier2(session)
+            return 1.0 if ok else 0.0
+    finally:
+        _finalize_hygiene(teardown=teardown, spec=s)

@@ -1,0 +1,25 @@
+{
+  "cell": "anthropic/claude-opus-4-8",
+  "k": 5,
+  "run_dirs": [
+    "archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T231549Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T231817Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T232051Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T232405Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T232748Z_anthropic"
+  ],
+  "rollup": {
+    "claude-opus-4-8": {
+      "counts": {
+        "PASS": 2,
+        "CAPABILITY_FAIL": 3
+      },
+      "resolution_rate": 0.4,
+      "scored": 5,
+      "excluded": 0,
+      "needs_rerun": false
+    }
+  },
+  "frozen_config": "PRE_PHASE6.md",
+  "timestamp": "2026-06-30T23:38:27.157070+00:00"
+}

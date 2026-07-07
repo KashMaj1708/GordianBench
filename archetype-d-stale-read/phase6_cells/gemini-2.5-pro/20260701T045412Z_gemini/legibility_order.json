@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gemini-2.5-pro\\20260701T045412Z_gemini",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'race condition' (race) at event 1, before first successful runtime probe at event 24",
+  "diagnosis_ordinal": 1,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 24,
+  "first_probe_cmd": "export ACCOUNT_ID=\"test-$(date +%s)\"\n# Create account by depositing 1 cent\ncurl -s -X POST -H \"Content-Type: application/json\" -d '{\"account\": \"'\"$ACCOUNT_ID\"'\", \"amount_cents\": 1}' $API_URL/deposit > /dev/null\n\npython3 -c '\nimport os\nimport requests\nimport time\n\nAPI_URL = os.environ[\"API_URL\"]\nACCOUNT_ID = os.environ[\"ACCOUNT_ID\"]\n\nbalance = 1\nfor i in range(10):\n    deposit_res = requests.post(f\"{API_URL}/deposit\", json={\"account\": ACCOUNT_ID, \"amount_cents\": 1})\n    if deposit_res.status_code != 200:\n        print(f\"Deposit failed: {deposit_res.text}\")\n        continue\n\n    new_balance = deposit_res.json()[\"balance_cents\"]\n    print(f\"Deposit successful. New balance: {new_balance}\")\n\n    balance_res = requests.get(f\"{API_URL}/balance?account={ACCOUNT_ID}\")\n    if balance_res.status_code != 200:\n        print(f\"Balance check failed: {balance_res.text}\")\n        continue\n\n    reported_balance = balance_res.json()[\"balance_cents\"]\n    source = balance_res.json()[\"source\"]\n    print(f\"Balance check successful. Reported balance: {reported_balance} from {source}\")\n    if reported_balance != new_balance:\n        print(f\"BUG! Stale read detected. Expected {new_balance}, got {reported_balance} from {source}\")\n        break\n'\n",
+  "probe_attempts": 3,
+  "probe_successes": 2,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

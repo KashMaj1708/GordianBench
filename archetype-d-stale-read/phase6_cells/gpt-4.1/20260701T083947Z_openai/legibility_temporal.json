@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T083947Z_openai",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (BANDAID: sleep); investigated (1 disambiguating probe(s))",
+  "fix_mechanism": "BANDAID",
+  "fix_evidence": "sleep",
+  "correctness_basis": null,
+  "delivered_bytes": 1419,
+  "investigated": true,
+  "disambiguating_probes": 1,
+  "first_observation_ordinal": 10,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "curl -i -X POST \"$API_URL/deposit\" -d '{\"account\": \"acct-1\", \"amount_cents\": 101}' -H 'Content-Type: application/json' && sleep 0.3 && curl -i \"$API_URL/balance",
+  "first_edit_ordinal": 24,
+  "observation_precedes_fix": true
+}

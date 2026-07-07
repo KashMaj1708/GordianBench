@@ -1,0 +1,5 @@
+{"ts": 1782523092.592, "stage": "submit_attempt", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 20, "tool_call_id": "toolu_01FSYsrVqCX231bQTmWzXXvv", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782523095.232, "stage": "content_check", "run": "anthropic/claude-haiku-4-5-20251001", "source": "workspace_git_diff", "byte_len": 898, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": "\ts.pin.mark(req.Account)\n-\n \twriteJSON(w, map[string]any{\n \t\t\"account\":       req.Account,\n \t\t\"balance_cents\": balance,\n", "ok": true}
+{"ts": 1782523102.371, "stage": "git_apply", "run": "anthropic/claude-haiku-4-5-20251001", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782523102.371, "stage": "extraction", "run": "anthropic/claude-haiku-4-5-20251001", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782523102.371, "stage": "accepted", "run": "anthropic/claude-haiku-4-5-20251001", "source": "workspace_git_diff", "byte_len": 898}

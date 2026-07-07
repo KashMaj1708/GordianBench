@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T174015Z_openai",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (2 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 4883,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 6,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "python3 - <<'PY'\nimport os, requests, time, random\napi=os.environ['API_URL']\nacct='acct-1'\n# get initial\nprint(requests.get(api+'/balance', params={'account':ac",
+  "first_edit_ordinal": 13,
+  "observation_precedes_fix": true
+}

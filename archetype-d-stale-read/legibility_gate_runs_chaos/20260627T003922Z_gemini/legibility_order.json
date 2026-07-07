@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_chaos\\20260627T003922Z_gemini",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'race condition' (race) with no successful runtime probe (0 probe attempt(s), 0 succeeded)",
+  "diagnosis_ordinal": 1,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": null,
+  "first_probe_cmd": null,
+  "probe_attempts": 0,
+  "probe_successes": 0,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

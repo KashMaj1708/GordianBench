@@ -1,0 +1,41 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..c264eec 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -37,7 +37,16 @@ func (p *readWritePin) pinned(account string) bool {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+ 	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++	if !ok {
++		return false
++	}
++	now := time.Now()
++	if now.Before(exp) {
++		return true
++	}
++	// Clean up expired entries
++	delete(p.exp, account)
++	return false
+ }
+ 
+ type server struct {
+@@ -66,8 +75,17 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Start by reading the current balance from primary (before update)
++	// to ensure we have a consistent read for the following write.
++	var oldBalance int64
++	err := s.primary.QueryRow("SELECT balance_cents FROM accounts WHERE id = $1 FOR UPDATE", req.Account).Scan(&oldBalance)
++	if err != nil && err != sql.ErrNoRows {
++		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++		return
++	}
++
+ 	var balance int64
+-	err := s.primary.QueryRow(
++	err = s.primary.QueryRow(
+ 		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
+ 		req.Amount, req.Account,
+ 	).Scan(&balance)

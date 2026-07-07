@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T173515Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (read_your_writes) at event 6 precedes first edit at event 11",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "LSN catch-up SQL: 'pg_last_wal_replay_lsn'",
+  "correctness_basis": "LSN (canonical)",
+  "delivered_bytes": 8210,
+  "investigated": true,
+  "disambiguating_probes": 3,
+  "first_observation_ordinal": 6,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "getent hosts ledger-api; curl -s $API_URL/health; echo; python3 - <<'PY'\nimport os,requests,time,random\nurl=os.environ['API_URL']\nacct='acct-1'\n# get initial\npr",
+  "first_edit_ordinal": 11,
+  "observation_precedes_fix": true
+}

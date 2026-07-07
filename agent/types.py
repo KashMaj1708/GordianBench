@@ -32,6 +32,11 @@ class ToolCall:
     id: str
     name: str
     input: dict[str, Any]
+    # Vendor-opaque metadata that must survive a round-trip through the canonical
+    # history (kept out of serialization). Gemini 3.x requires the per-call
+    # `thought_signature` to be echoed back on later turns, so the adapter stashes
+    # it here. Other adapters ignore it.
+    provider_meta: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -54,6 +59,8 @@ class Message:
 class Usage:
     input_tokens: int = 0
     output_tokens: int = 0
+    cache_read_input_tokens: int = 0
+    cache_creation_input_tokens: int = 0
 
 
 @dataclass

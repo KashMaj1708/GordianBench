@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_deleaked\\20260626T190516Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (read_your_writes) at event 21 precedes first edit at event 40",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "value/version catch-up: replica read compared to remembered write before trusting",
+  "correctness_basis": "value-catchup (unconfirmed)",
+  "delivered_bytes": 2676,
+  "investigated": true,
+  "disambiguating_probes": 5,
+  "first_observation_ordinal": 21,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "python3 << 'EOF'\nimport requests\nimport json\nimport time\n\napi_url = \"http://ledger-api:8080\"\naccount = \"acct-1\"\n\n# Reset account to 0\nresp = requests.post(f\"{ap",
+  "first_edit_ordinal": 40,
+  "observation_precedes_fix": true
+}

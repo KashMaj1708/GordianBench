@@ -1,0 +1,10 @@
+{
+  "gate": "archetype-d-stale-read-legibility",
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "turns_used": 20,
+  "patch_bytes": 902,
+  "patch_source": "auto:workspace_git_diff",
+  "patch_death_stage": null,
+  "chaos": true
+}

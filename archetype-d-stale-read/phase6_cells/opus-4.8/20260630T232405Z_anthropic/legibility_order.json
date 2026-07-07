@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T232405Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) at event 4, before first successful runtime probe at event 34",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 34,
+  "first_probe_cmd": "\n# Confirm replication still lagged\npsql \"$REPLICA_URL\" -c \"SELECT id, balance_cents FROM accounts WHERE id='acct-1';\" 2>/dev/null\necho \"--- live API test (current binary is OLD until rebuild) ---\"\ncurl -s -X POST \"$API_URL/deposit\" -d '{\"account\":\"acct-1\",\"amount_cents\":50}' -H 'Content-Type: application/json'; echo\nsleep 0.5\ncurl -s \"$API_URL/balance?account=acct-1\"; echo\n",
+  "probe_attempts": 1,
+  "probe_successes": 1,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

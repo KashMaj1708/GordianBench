@@ -1,0 +1,30 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..259beb7 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -24,7 +24,24 @@ type readWritePin struct {
+ }
+ 
+ func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++	p := &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++	go func() {
++		// Periodically clean up expired pins to prevent unbounded map growth, which
++		// can cause long GC pauses that in turn cause this read-after-write
++		// mechanism to fail.
++		for {
++			time.Sleep(ttl)
++			now := time.Now()
++			p.mu.Lock()
++			for account, exp := range p.exp {
++				if now.After(exp) {
++					delete(p.exp, account)
++				}
++			}
++			p.mu.Unlock()
++		}
++	}()
++	return p
+ }
+ 
+ func (p *readWritePin) mark(account string) {

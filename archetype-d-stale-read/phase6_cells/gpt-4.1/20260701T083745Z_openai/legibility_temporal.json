@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T083745Z_openai",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification); also band-aid(ttl_bump)); investigated (1 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification); also band-aid(ttl_bump)",
+  "correctness_basis": null,
+  "delivered_bytes": 3973,
+  "investigated": true,
+  "disambiguating_probes": 1,
+  "first_observation_ordinal": 9,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "curl -s -X POST -H 'Content-Type: application/json' -d '{\"account\": \"acct-1\", \"amount_cents\": 1000}' \"$API_URL/deposit\"; sleep 0.2; curl -s \"$API_URL/balance?ac",
+  "first_edit_ordinal": 20,
+  "observation_precedes_fix": true
+}

@@ -1,0 +1,142 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..68e3c99 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -6,44 +6,17 @@ import (
+ 	"log"
+ 	"net/http"
+ 	"os"
+-	"strconv"
+-	"sync"
+-	"time"
++	// "strconv" // removed: unused
+ 
+ 	_ "github.com/lib/pq"
+ )
+ 
+-// readWritePin implements read-after-write consistency: for a short window after
+-// a client writes an account, that account's reads are served from the primary
+-// so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
+-type readWritePin struct {
+-	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
+-}
+-
+-func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
+-}
+-
+-func (p *readWritePin) mark(account string) {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
+-}
+-
+-func (p *readWritePin) pinned(account string) bool {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
+-}
++// Removed readWritePin logic for strict read-after-write consistency
+ 
+ type server struct {
+ 	primary *sql.DB
+-	replica *sql.DB
+-	pin     *readWritePin
++	// replica *sql.DB // unused now
++	// pin     *readWritePin // unused now
+ }
+ 
+ type depositRequest struct {
+@@ -76,9 +49,6 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
+-
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+ 		"balance_cents": balance,
+@@ -93,19 +63,11 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
+-	}
++	// Always use primary DB for reads to guarantee consistency
++	source := "primary"
++	db := s.primary
+ 
+ 	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
+-	}
+ 	if err != nil {
+ 		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
+ 		return
+@@ -129,10 +91,7 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
+ 		http.Error(w, "primary down", http.StatusServiceUnavailable)
+ 		return
+ 	}
+-	if err := s.replica.Ping(); err != nil {
+-		http.Error(w, "replica down", http.StatusServiceUnavailable)
+-		return
+-	}
++	// No replica check
+ 	w.WriteHeader(http.StatusOK)
+ 	_, _ = w.Write([]byte("ok"))
+ }
+@@ -153,25 +112,23 @@ func mustOpen(dsn string) *sql.DB {
+ 
+ func main() {
+ 	primaryDSN := os.Getenv("PRIMARY_URL")
+-	replicaDSN := os.Getenv("REPLICA_URL")
+-	if primaryDSN == "" || replicaDSN == "" {
+-		log.Fatal("PRIMARY_URL and REPLICA_URL required")
++	// replicaDSN := os.Getenv("REPLICA_URL") // unused
++	if primaryDSN == "" {
++		log.Fatal("PRIMARY_URL required")
+ 	}
+ 
+-	ttlMS := 250
+-	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+-		if parsed, err := strconv.Atoi(v); err == nil {
+-			ttlMS = parsed
+-		}
+-	}
++	// ttlMS := 250 -- unused
++	// if v := os.Getenv("PIN_TTL_MS"); v != "" {
++	// 	if parsed, err := strconv.Atoi(v); err == nil {
++	// 		ttlMS = parsed
++	// 	}
++	// }
+ 
+ 	s := &server{
+ 		primary: mustOpen(primaryDSN),
+-		replica: mustOpen(replicaDSN),
+-		pin:     newReadWritePin(time.Duration(ttlMS) * time.Millisecond),
+ 	}
+ 	defer s.primary.Close()
+-	defer s.replica.Close()
++	// defer s.replica.Close() // unused
+ 
+ 	mux := http.NewServeMux()
+ 	mux.HandleFunc("/health", s.handleHealth)
+@@ -182,6 +139,6 @@ func main() {
+ 	if p := os.Getenv("PORT"); p != "" {
+ 		addr = ":" + p
+ 	}
+-	log.Printf("ledger-api listening on %s (pin ttl %dms)", addr, ttlMS)
++	log.Printf("ledger-api listening on %s (primary only)", addr)
+ 	log.Fatal(http.ListenAndServe(addr, mux))
+ }

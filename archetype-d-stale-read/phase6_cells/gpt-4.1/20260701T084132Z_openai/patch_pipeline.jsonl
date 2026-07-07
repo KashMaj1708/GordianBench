@@ -1,0 +1,22 @@
+{"ts": 1782895228.899, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 1, "input_tokens": 654, "output_tokens": 17, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782895230.179, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 2, "input_tokens": 1944, "output_tokens": 24, "cache_read_input_tokens": 1792, "cache_creation_input_tokens": 0}
+{"ts": 1782895231.647, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 3, "input_tokens": 1998, "output_tokens": 25, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782895233.043, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 4, "input_tokens": 2064, "output_tokens": 25, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782895235.024, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 5, "input_tokens": 2133, "output_tokens": 28, "cache_read_input_tokens": 2048, "cache_creation_input_tokens": 0}
+{"ts": 1782895237.166, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 6, "input_tokens": 2193, "output_tokens": 99, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782895239.423, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 7, "input_tokens": 2349, "output_tokens": 30, "cache_read_input_tokens": 2176, "cache_creation_input_tokens": 0}
+{"ts": 1782895240.836, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 8, "input_tokens": 2411, "output_tokens": 28, "cache_read_input_tokens": 2048, "cache_creation_input_tokens": 0}
+{"ts": 1782895243.56, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 9, "input_tokens": 2471, "output_tokens": 33, "cache_read_input_tokens": 2432, "cache_creation_input_tokens": 0}
+{"ts": 1782895244.858, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 10, "input_tokens": 2527, "output_tokens": 19, "cache_read_input_tokens": 2432, "cache_creation_input_tokens": 0}
+{"ts": 1782895246.115, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 11, "input_tokens": 2572, "output_tokens": 20, "cache_read_input_tokens": 2432, "cache_creation_input_tokens": 0}
+{"ts": 1782895248.053, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 12, "input_tokens": 2605, "output_tokens": 29, "cache_read_input_tokens": 2304, "cache_creation_input_tokens": 0}
+{"ts": 1782895252.331, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 13, "input_tokens": 2661, "output_tokens": 311, "cache_read_input_tokens": 2560, "cache_creation_input_tokens": 0}
+{"ts": 1782895261.737, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 14, "input_tokens": 4248, "output_tokens": 1528, "cache_read_input_tokens": 2944, "cache_creation_input_tokens": 0}
+{"ts": 1782895262.488, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 15, "input_tokens": 5832, "output_tokens": 10, "cache_read_input_tokens": 5760, "cache_creation_input_tokens": 0}
+{"ts": 1782895262.488, "stage": "submit_attempt", "run": "openai/gpt-4.1", "turn": 15, "tool_call_id": "call_6FAUNFmzASIrdOBmNruk9GUA", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782895264.723, "stage": "content_check", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 1113, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": " account)\n-\t}\n \tif err != nil {\n \t\thttp.Error(w, \"read failed: \"+err.Error(), http.StatusInternalServerError)\n \t\treturn\n", "ok": true}
+{"ts": 1782895265.673, "stage": "git_apply", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782895265.673, "stage": "extraction", "run": "openai/gpt-4.1", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782895288.185, "stage": "build", "run": "openai/gpt-4.1", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782895288.185, "stage": "accepted", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 1113}
+{"ts": 1782895288.185, "stage": "usage", "run": "openai/gpt-4.1", "input_tokens": 38662, "output_tokens": 2226, "cache_read_input_tokens": 34688, "cache_creation_input_tokens": 0}

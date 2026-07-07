@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T232051Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (read_your_writes) at event 11 precedes first edit at event 19",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "LSN catch-up SQL: 'pg_last_wal_replay_lsn'",
+  "correctness_basis": "LSN (canonical)",
+  "delivered_bytes": 5289,
+  "investigated": true,
+  "disambiguating_probes": 4,
+  "first_observation_ordinal": 11,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "acct=\"acct-test-$RANDOM\"\n# create account\npsql \"$PRIMARY_URL\" -c \"INSERT INTO accounts (id, balance_cents) VALUES ('$acct', 100) ON CONFLICT (id) DO UPDATE SET ",
+  "first_edit_ordinal": 19,
+  "observation_precedes_fix": true
+}

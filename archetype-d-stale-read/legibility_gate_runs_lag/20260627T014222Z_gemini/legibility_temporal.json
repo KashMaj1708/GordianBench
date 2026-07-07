@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T014222Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (UNRELATED: no change to read-routing / TTL / catch-up); did not investigate (0 disambiguating probe(s))",
+  "fix_mechanism": "UNRELATED",
+  "fix_evidence": "no change to read-routing / TTL / catch-up",
+  "correctness_basis": null,
+  "delivered_bytes": 1030,
+  "investigated": false,
+  "disambiguating_probes": 0,
+  "first_observation_ordinal": null,
+  "first_observation_kind": null,
+  "first_observation_cmd": null,
+  "first_edit_ordinal": 5,
+  "observation_precedes_fix": false
+}

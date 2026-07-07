@@ -1,0 +1,26 @@
+{
+  "cell": "openai/gpt-4.1",
+  "k": 5,
+  "run_dirs": [
+    "archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T083435Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T083745Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T083947Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T084132Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T084324Z_openai"
+  ],
+  "rollup": {
+    "gpt-4.1": {
+      "counts": {
+        "BUILD_FAIL": 1,
+        "PASS": 2,
+        "CAPABILITY_FAIL": 2
+      },
+      "resolution_rate": 0.4,
+      "scored": 5,
+      "excluded": 0,
+      "needs_rerun": false
+    }
+  },
+  "frozen_config": "PRE_PHASE6.md",
+  "timestamp": "2026-07-01T08:51:15.528419+00:00"
+}

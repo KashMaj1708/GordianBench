@@ -1,0 +1,4 @@
+{"ts": 1782500229.386, "stage": "content_check", "run": "anthropic/claude-haiku-4-5-20251001", "source": "workspace_git_diff", "byte_len": 887, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": "\ts.pin.mark(req.Account)\n-\n \twriteJSON(w, map[string]any{\n \t\t\"account\":       req.Account,\n \t\t\"balance_cents\": balance,\n", "ok": true}
+{"ts": 1782500235.672, "stage": "git_apply", "run": "anthropic/claude-haiku-4-5-20251001", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782500235.672, "stage": "extraction", "run": "anthropic/claude-haiku-4-5-20251001", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782500235.672, "stage": "auto_submit", "run": "anthropic/claude-haiku-4-5-20251001", "source": "workspace_git_diff", "byte_len": 887, "ok": true}

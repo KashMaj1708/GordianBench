@@ -1,0 +1,48 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..05ceaf2 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -40,6 +40,12 @@ func (p *readWritePin) pinned(account string) bool {
+ 	return ok && time.Now().Before(exp)
+ }
+ 
++func (p *readWritePin) unpin(account string) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	delete(p.exp, account)
++}
++
+ type server struct {
+ 	primary *sql.DB
+ 	replica *sql.DB
+@@ -76,9 +82,29 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
++	// Mark as pinned immediately after write.
+ 	s.pin.mark(req.Account)
+ 
++	// Wait until the new balance is visible on the replica before returning.
++	const maxWait = 2 * time.Second
++	const interval = 20 * time.Millisecond
++	waited := time.Duration(0)
++	for {
++		replicaBalance, err := readBalance(s.replica, req.Account)
++		if err == nil && replicaBalance == balance {
++			break
++		}
++		time.Sleep(interval)
++		waited += interval
++		if waited >= maxWait {
++			log.Printf("Warning: replica did not catch up for account %s after %v", req.Account, maxWait)
++			break
++		}
++	}
++
++	// Optionally, unpin now since replica is consistent, but keep original pinning for safety.
++	// s.pin.unpin(req.Account)
++
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+ 		"balance_cents": balance,

@@ -1,0 +1,11 @@
+{"ts": 1782863601.662, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 1, "input_tokens": 1412, "output_tokens": 81, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782863603.264, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 2, "input_tokens": 3178, "output_tokens": 87, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782863608.442, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 3, "input_tokens": 3350, "output_tokens": 526, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782863611.723, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 4, "input_tokens": 7, "output_tokens": 85, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 4273}
+{"ts": 1782863614.117, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 5, "input_tokens": 6, "output_tokens": 89, "cache_read_input_tokens": 4273, "cache_creation_input_tokens": 371}
+{"ts": 1782863619.469, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 6, "input_tokens": 6, "output_tokens": 519, "cache_read_input_tokens": 4644, "cache_creation_input_tokens": 120}
+{"ts": 1782863626.414, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 7, "input_tokens": 6, "output_tokens": 532, "cache_read_input_tokens": 4764, "cache_creation_input_tokens": 1819}
+{"ts": 1782863663.597, "stage": "turn_usage", "run": "anthropic/claude-haiku-4-5-20251001", "turn": 8, "input_tokens": 7, "output_tokens": 4096, "cache_read_input_tokens": 6583, "cache_creation_input_tokens": 953}
+{"ts": 1782863667.153, "stage": "extraction", "run": "anthropic/claude-haiku-4-5-20251001", "tried": ["workspace_git_diff", "workspace_patch_file"], "resolved_from": null, "workspace_files_present": []}
+{"ts": 1782863667.153, "stage": "auto_submit", "run": "anthropic/claude-haiku-4-5-20251001", "ok": false, "reason": "no workspace edits and no patch file"}
+{"ts": 1782863670.192, "stage": "usage", "run": "anthropic/claude-haiku-4-5-20251001", "input_tokens": 7972, "output_tokens": 6015, "cache_read_input_tokens": 20264, "cache_creation_input_tokens": 7536}

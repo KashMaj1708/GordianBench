@@ -1,0 +1,18 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..13c1e5a 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -158,10 +158,11 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
++	// Increased default pin duration to 3000ms (3 seconds) to reliably cover replica lag.
++	ttlMS := 3000
+ 	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+ 		if parsed, err := strconv.Atoi(v); err == nil {
+-			ttlMS = parsed
++			tlMS = parsed
+ 		}
+ 	}
+ 

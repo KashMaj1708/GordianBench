@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T012956Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (NONE: empty patch); investigated (5 disambiguating probe(s))",
+  "fix_mechanism": "NONE",
+  "fix_evidence": "empty patch",
+  "correctness_basis": null,
+  "delivered_bytes": 0,
+  "investigated": true,
+  "disambiguating_probes": 5,
+  "first_observation_ordinal": 36,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# Test the data consistency issue with more detail\npython3 << 'EOF'\nimport json\nimport requests\nimport time\n\napi_url = \"http://ledger-api:8080\"\naccount = \"test-",
+  "first_edit_ordinal": 60,
+  "observation_precedes_fix": true
+}

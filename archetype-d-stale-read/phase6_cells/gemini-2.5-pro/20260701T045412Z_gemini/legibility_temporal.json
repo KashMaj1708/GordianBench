@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gemini-2.5-pro\\20260701T045412Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (2 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 578,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 24,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "export ACCOUNT_ID=\"test-$(date +%s)\"\n# Create account by depositing 1 cent\ncurl -s -X POST -H \"Content-Type: application/json\" -d '{\"account\": \"'\"$ACCOUNT_ID\"'\"",
+  "first_edit_ordinal": 32,
+  "observation_precedes_fix": true
+}

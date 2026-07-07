@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stub\\legibility_gate_runs\\20260624T040931Z_gemini",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'write-skew' (write-skew) at event 1, before first successful runtime probe at event 15",
+  "diagnosis_ordinal": 1,
+  "diagnosis_class": "write-skew",
+  "diagnosis_term": "write-skew",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 15,
+  "first_probe_cmd": "curl %API_URL%/balances",
+  "probe_attempts": 4,
+  "probe_successes": 2,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

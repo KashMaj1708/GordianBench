@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus_k5\\20260627T040933Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'stale read' (stale-read) at event 4, before first successful runtime probe at event 17",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "stale read",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 17,
+  "first_probe_cmd": "sleep 3\necho \"PRIMARY:\"; psql \"$PRIMARY_URL\" -tAc \"SELECT id,balance_cents FROM accounts WHERE id='acct-1';\"\necho \"REPLICA:\"; psql \"$REPLICA_URL\" -tAc \"SELECT id,balance_cents FROM accounts WHERE id='acct-1';\"\necho \"--- replica recovery status ---\"\npsql \"$REPLICA_URL\" -tAc \"SELECT pg_is_in_recovery();\" 2>&1\necho \"--- all accounts on replica ---\"\npsql \"$REPLICA_URL\" -tAc \"SELECT count(*) FROM accounts;\" 2>&1",
+  "probe_attempts": 2,
+  "probe_successes": 2,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

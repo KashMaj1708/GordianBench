@@ -1,0 +1,68 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..4061f41 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -77,6 +77,8 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	// Client just wrote this account; serve its reads from the primary briefly.
++	// This ensures the client reads its own write even if the replica has not yet
++	// caught up with the replication lag.
+ 	s.pin.mark(req.Account)
+ 
+ 	writeJSON(w, map[string]any{
+@@ -93,28 +95,42 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
++	// Always read from primary first when the account is pinned,
++	// to ensure read-after-write consistency.
+ 	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
++		balance, err := readBalance(s.primary, account)
++		if err == nil {
++			writeJSON(w, map[string]any{
++				"account":       account,
++				"balance_cents": balance,
++				"source":        "primary",
++			})
++			return
++		}
++		// If primary fails, fall through to try replica
+ 	}
+ 
+-	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
+-	}
++	// For unpinned accounts, try replica first; fall back to primary on error.
++	balance, err := readBalance(s.replica, account)
+ 	if err != nil {
+-		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++		// Replica unavailable; fall back to primary
++		balance, err = readBalance(s.primary, account)
++		if err != nil {
++			http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++			return
++		}
++		writeJSON(w, map[string]any{
++			"account":       account,
++			"balance_cents": balance,
++			"source":        "primary",
++		})
+ 		return
+ 	}
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       account,
+ 		"balance_cents": balance,
+-		"source":        source,
++		"source":        "replica",
+ 	})
+ }
+ 

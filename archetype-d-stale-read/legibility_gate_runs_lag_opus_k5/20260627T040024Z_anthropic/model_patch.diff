@@ -1,0 +1,44 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..4b894fd 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -17,6 +17,14 @@ import (
+ // a client writes an account, that account's reads are served from the primary
+ // so the client reads its own write. Reads outside the window use the replica to
+ // offload the primary.
++//
++// NOTE: a fixed time window is NOT a safe basis for read-your-writes correctness.
++// Replication lag is unbounded (and on this stack the replica can fall arbitrarily
++// far behind or stall entirely), so once the window expires a balance read can
++// silently revert to a stale value. For a ledger that is a data-consistency bug.
++// We therefore keep the pin only as a routing hint/optimization, but the balance
++// handler guarantees correctness by verifying freshness against the primary
++// before trusting a replica result.
+ type readWritePin struct {
+ 	mu  sync.Mutex
+ 	ttl time.Duration
+@@ -93,15 +101,15 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
+-	}
+-
+-	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
++	// Correctness first: the balance of a ledger account must always reflect the
++	// latest committed write. A time-bounded pin cannot guarantee that because
++	// replication lag is unbounded, so we read the authoritative value from the
++	// primary. The replica is only used as a fallback when the primary read
++	// genuinely fails, accepting reduced consistency rather than returning an
++	// error.
++	balance, err := readBalance(s.primary, account)
++	source := "primary"
++	if err != nil {
+ 		// Primary read path unavailable; fall back to the replica.
+ 		source = "replica"
+ 		balance, err = readBalance(s.replica, account)

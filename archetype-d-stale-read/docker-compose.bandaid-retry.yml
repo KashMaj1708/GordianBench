@@ -1,0 +1,7 @@
+# Band-aid: retry the read, as if staleness were transient. Must FAIL Tier 2: a
+# partitioned replica is frozen, so every retry returns the same stale value.
+services:
+  ledger-api:
+    image: archetype-d-stale-read-ledger-api:bandaid-retry
+    build:
+      context: ./patches/bandaid-retry/ledger-api

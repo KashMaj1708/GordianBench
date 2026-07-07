@@ -1,0 +1,5 @@
+{"ts": 1782524532.365, "stage": "submit_attempt", "run": "gemini/gemini-2.5-pro", "turn": 4, "tool_call_id": "gemini_985e4b03a10b", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782524534.579, "stage": "content_check", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 1032, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": "unt\":       account,\n \t\t\"balance_cents\": balance,\n-\t\t\"source\":        source,\n+\t\t\"source\":        sourceName,\n \t})\n }\n \n", "ok": true}
+{"ts": 1782524535.746, "stage": "git_apply", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782524535.746, "stage": "extraction", "run": "gemini/gemini-2.5-pro", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782524535.746, "stage": "accepted", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 1032}

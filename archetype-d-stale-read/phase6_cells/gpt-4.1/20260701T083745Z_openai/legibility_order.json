@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T083745Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 6 precedes named diagnosis at event 19",
+  "diagnosis_ordinal": 19,
+  "diagnosis_class": "isolation",
+  "diagnosis_term": "READ COMMITTED",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 6,
+  "first_probe_cmd": "psql \"$PRIMARY_URL\" -c '\\d accounts' && psql \"$PRIMARY_URL\" -c 'SELECT * FROM accounts'",
+  "probe_attempts": 5,
+  "probe_successes": 3,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

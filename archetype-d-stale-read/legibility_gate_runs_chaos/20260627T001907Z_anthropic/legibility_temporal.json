@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_chaos\\20260627T001907Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (5 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 902,
+  "investigated": true,
+  "disambiguating_probes": 5,
+  "first_observation_ordinal": 33,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# Let's reset and run a careful test\npsql $PRIMARY_URL -c \"UPDATE accounts SET balance_cents = 0 WHERE id='acct-1';\"\npsql $REPLICA_URL -c \"UPDATE accounts SET b",
+  "first_edit_ordinal": 60,
+  "observation_precedes_fix": true
+}

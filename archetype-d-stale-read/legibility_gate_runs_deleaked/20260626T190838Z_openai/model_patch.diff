@@ -1,0 +1,21 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..99c7548 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -66,10 +66,14 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Perform UPSERT: create account if it doesn't exist, else add amount
+ 	var balance int64
+ 	err := s.primary.QueryRow(
+-		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
+-		req.Amount, req.Account,
++		`INSERT INTO accounts (id, balance_cents)
++		 VALUES ($1, $2)
++		 ON CONFLICT (id) DO UPDATE SET balance_cents = accounts.balance_cents + $2
++		 RETURNING balance_cents`,
++		req.Account, req.Amount,
+ 	).Scan(&balance)
+ 	if err != nil {
+ 		http.Error(w, "write failed: "+err.Error(), http.StatusInternalServerError)

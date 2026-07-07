@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_chaos\\20260627T002543Z_openai",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (3 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 1917,
+  "investigated": true,
+  "disambiguating_probes": 3,
+  "first_observation_ordinal": 6,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "curl -s -X POST $API_URL/deposit -d '{\"account\":\"acct-debug\",\"amount_cents\":1000}' -H 'Content-Type: application/json' && curl -s \"$API_URL/balance?account=acct",
+  "first_edit_ordinal": 28,
+  "observation_precedes_fix": true
+}

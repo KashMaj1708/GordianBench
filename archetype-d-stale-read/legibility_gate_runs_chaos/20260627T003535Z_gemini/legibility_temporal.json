@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_chaos\\20260627T003535Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (UNRELATED: no change to read-routing / TTL / catch-up); investigated (3 disambiguating probe(s))",
+  "fix_mechanism": "UNRELATED",
+  "fix_evidence": "no change to read-routing / TTL / catch-up",
+  "correctness_basis": null,
+  "delivered_bytes": 592,
+  "investigated": true,
+  "disambiguating_probes": 3,
+  "first_observation_ordinal": 6,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# Set a unique account ID for this test run\nexport TEST_ACCT=\"test-$(date +%s)\"\n\n# Initialize the account with a known balance\ncurl -s -X POST \"${API_URL}/depos",
+  "first_edit_ordinal": 44,
+  "observation_precedes_fix": true
+}

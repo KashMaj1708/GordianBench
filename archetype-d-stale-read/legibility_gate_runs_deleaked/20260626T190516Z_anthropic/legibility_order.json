@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_deleaked\\20260626T190516Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 18 precedes named diagnosis at event 19",
+  "diagnosis_ordinal": 19,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 18,
+  "first_probe_cmd": "\n# Check if we can access the database\npython3 << 'EOF'\nimport psycopg2\n\n# Connect to the primary database\nconn = psycopg2.connect(\n    \"postgresql://bench:bench@postgres-primary:5432/ledger\"\n)\ncur = conn.cursor()\n\n# Check the schema\ncur.execute(\"\"\"\n    SELECT table_name \n    FROM information_schema.tables \n    WHERE table_schema = 'public'\n\"\"\")\nprint(\"Tables:\", cur.fetchall())\n\n# Check if accounts table exists and what's in it\ntry:\n    cur.execute(\"SELECT COUNT(*) FROM accounts\")\n    count = cur.fetchone()[0]\n    print(f\"Number of accounts: {count}\")\n    \n    # Get sample accounts\n    cur.execute(\"SELECT id, balance_cents FROM accounts LIMIT 5\")\n    for row in cur.fetchall():\n        print(f\"  {row}\")\nexcept Exception as e:\n    print(f\"Error: {e}\")\n\ncur.close()\nconn.close()\nEOF\n",
+  "probe_attempts": 11,
+  "probe_successes": 9,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

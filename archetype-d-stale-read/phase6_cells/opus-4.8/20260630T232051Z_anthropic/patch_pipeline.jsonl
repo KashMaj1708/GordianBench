@@ -1,0 +1,18 @@
+{"ts": 1782861542.44, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 1, "input_tokens": 2, "output_tokens": 67, "cache_read_input_tokens": 1484, "cache_creation_input_tokens": 0}
+{"ts": 1782861546.845, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 2, "input_tokens": 2, "output_tokens": 294, "cache_read_input_tokens": 3722, "cache_creation_input_tokens": 0}
+{"ts": 1782861549.4, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 3, "input_tokens": 2, "output_tokens": 91, "cache_read_input_tokens": 3722, "cache_creation_input_tokens": 420}
+{"ts": 1782861556.353, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 4, "input_tokens": 2, "output_tokens": 412, "cache_read_input_tokens": 4142, "cache_creation_input_tokens": 261}
+{"ts": 1782861564.746, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 5, "input_tokens": 2, "output_tokens": 443, "cache_read_input_tokens": 4403, "cache_creation_input_tokens": 525}
+{"ts": 1782861569.818, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 6, "input_tokens": 2, "output_tokens": 314, "cache_read_input_tokens": 4928, "cache_creation_input_tokens": 494}
+{"ts": 1782861600.226, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 7, "input_tokens": 2, "output_tokens": 3251, "cache_read_input_tokens": 5422, "cache_creation_input_tokens": 333}
+{"ts": 1782861602.988, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 8, "input_tokens": 2, "output_tokens": 122, "cache_read_input_tokens": 5755, "cache_creation_input_tokens": 3328}
+{"ts": 1782861609.828, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 9, "input_tokens": 2, "output_tokens": 254, "cache_read_input_tokens": 9083, "cache_creation_input_tokens": 998}
+{"ts": 1782861616.527, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 10, "input_tokens": 2, "output_tokens": 479, "cache_read_input_tokens": 10081, "cache_creation_input_tokens": 272}
+{"ts": 1782861625.075, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 11, "input_tokens": 2, "output_tokens": 553, "cache_read_input_tokens": 10353, "cache_creation_input_tokens": 576}
+{"ts": 1782861625.075, "stage": "submit_attempt", "run": "anthropic/claude-opus-4-8", "turn": 11, "tool_call_id": "toolu_01DBwjfrVc2xTw1ayWGEGGTT", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782861626.884, "stage": "content_check", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5289, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 4, "last_120_chars": " {\n \tvar balance int64\n \terr := db.QueryRow(\"SELECT balance_cents FROM accounts WHERE id = $1\", account).Scan(&balance)\n", "ok": true}
+{"ts": 1782861627.711, "stage": "git_apply", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782861627.711, "stage": "extraction", "run": "anthropic/claude-opus-4-8", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782861647.733, "stage": "build", "run": "anthropic/claude-opus-4-8", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782861647.733, "stage": "accepted", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5289}
+{"ts": 1782861647.733, "stage": "usage", "run": "anthropic/claude-opus-4-8", "input_tokens": 22, "output_tokens": 6280, "cache_read_input_tokens": 63095, "cache_creation_input_tokens": 7207}

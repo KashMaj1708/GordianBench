@@ -1,0 +1,35 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..88f5346 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -86,6 +86,7 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	})
+ }
+ 
++// PATCH: always read balance from primary for strong consistency
+ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	account := r.URL.Query().Get("account")
+ 	if account == "" {
+@@ -93,19 +94,11 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
+-	}
++	source := "primary"
++	db := s.primary
++	// ignore pinning and replica - always use primary for accuracy
+ 
+ 	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
+-	}
+ 	if err != nil {
+ 		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
+ 		return

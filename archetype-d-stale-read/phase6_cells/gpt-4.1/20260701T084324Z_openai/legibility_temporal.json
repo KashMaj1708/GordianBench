@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T084324Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (replication_lag) at event 20 precedes first edit at event 27",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "LSN catch-up SQL: 'pg_last_wal_replay_lsn'",
+  "correctness_basis": "LSN (canonical)",
+  "delivered_bytes": 3505,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 20,
+  "first_observation_kind": "replication_lag",
+  "first_observation_cmd": "psql \"$PRIMARY_URL\" -c 'SELECT pg_current_wal_lsn();'",
+  "first_edit_ordinal": 27,
+  "observation_precedes_fix": true
+}

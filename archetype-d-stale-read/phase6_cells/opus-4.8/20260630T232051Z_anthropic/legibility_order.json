@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T232051Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) at event 4, before first successful runtime probe at event 11",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 11,
+  "first_probe_cmd": "acct=\"acct-test-$RANDOM\"\n# create account\npsql \"$PRIMARY_URL\" -c \"INSERT INTO accounts (id, balance_cents) VALUES ('$acct', 100) ON CONFLICT (id) DO UPDATE SET balance_cents=100;\" 2>&1 | tail -1\nsleep 1\necho \"deposit:\"\ncurl -s -X POST \"$API_URL/deposit\" -H 'Content-Type: application/json' -d \"{\\\"account\\\":\\\"$acct\\\",\\\"amount_cents\\\":50}\"\necho\necho \"immediate balance:\"\ncurl -s \"$API_URL/balance?account=$acct\"\necho\nsleep 1\necho \"balance after 1s (pin expired):\"\ncurl -s \"$API_URL/balance?account=$acct\"\necho",
+  "probe_attempts": 2,
+  "probe_successes": 2,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

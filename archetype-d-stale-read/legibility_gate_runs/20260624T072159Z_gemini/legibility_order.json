@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs\\20260624T072159Z_gemini",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) with no successful runtime probe (4 probe attempt(s), 0 succeeded)",
+  "diagnosis_ordinal": 1,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": null,
+  "first_probe_cmd": null,
+  "probe_attempts": 4,
+  "probe_successes": 0,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

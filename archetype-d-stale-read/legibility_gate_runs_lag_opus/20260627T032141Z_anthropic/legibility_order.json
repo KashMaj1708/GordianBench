@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus\\20260627T032141Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) at event 4, before first successful runtime probe at event 11",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 11,
+  "first_probe_cmd": "# Check replication lag between primary and replica\necho \"PRIMARY:\"; psql \"$PRIMARY_URL\" -tAc \"SELECT id, balance_cents FROM accounts WHERE id='acct-1'\"\necho \"REPLICA:\"; psql \"$REPLICA_URL\" -tAc \"SELECT id, balance_cents FROM accounts WHERE id='acct-1'\"\necho \"--- toxics ---\"\ncurl -s \"$TOXIPROXY_URL/proxies\" | python3 -m json.tool 2>/dev/null | head -60",
+  "probe_attempts": 2,
+  "probe_successes": 2,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

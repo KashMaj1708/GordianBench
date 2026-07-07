@@ -1,0 +1,10 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stub\\legibility_gate_runs\\20260624T040931Z_gemini",
+  "verdict": "INCONCLUSIVE",
+  "reason": "no patch submitted",
+  "submitted_patch": false,
+  "investigation_before_patch": true,
+  "investigative_bash_count": 7,
+  "textbook_fix_in_patch": false,
+  "patch_bytes": 0
+}

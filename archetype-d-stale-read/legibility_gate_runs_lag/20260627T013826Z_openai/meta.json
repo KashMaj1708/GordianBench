@@ -1,0 +1,11 @@
+{
+  "gate": "archetype-d-stale-read-legibility",
+  "provider": "openai",
+  "model": "gpt-4.1",
+  "turns_used": 14,
+  "patch_bytes": 0,
+  "patch_source": null,
+  "patch_death_stage": "auto_submit",
+  "chaos_mode": "lag",
+  "chaos_lag_ms": 20000
+}

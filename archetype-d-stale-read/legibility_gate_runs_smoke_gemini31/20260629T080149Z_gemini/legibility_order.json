@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_smoke_gemini31\\20260629T080149Z_gemini",
+  "verdict": "NO_DIAGNOSIS",
+  "test2": "N/A",
+  "reason": "no named root cause in assistant text",
+  "diagnosis_ordinal": null,
+  "diagnosis_class": null,
+  "diagnosis_term": null,
+  "diagnosis_role": null,
+  "first_probe_ordinal": 26,
+  "first_probe_cmd": "curl http://ledger-api:8080/health; echo; curl -s http://ledger-api:8080/balance?account=acct-1",
+  "probe_attempts": 3,
+  "probe_successes": 3,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

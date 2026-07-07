@@ -1,0 +1,163 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..0b531b0 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -6,44 +6,51 @@ import (
+ 	"log"
+ 	"net/http"
+ 	"os"
+-	"strconv"
+ 	"sync"
+-	"time"
+ 
+ 	_ "github.com/lib/pq"
+ )
+ 
+-// readWritePin implements read-after-write consistency: for a short window after
+-// a client writes an account, that account's reads are served from the primary
+-// so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
+-type readWritePin struct {
++// writeWatermark implements read-after-write consistency that is robust to
++// arbitrary (even unbounded) replication lag.
++//
++// The previous implementation "pinned" an account to the primary for a fixed
++// time window (a TTL) after a write. That is a race against replication lag:
++// once the window expires, reads are served from the replica even if the
++// replica has not yet replayed the write, so a follow-up GET /balance can
++// return the stale, pre-deposit value. With a slow or stalled replica this
++// happens routinely.
++//
++// Instead we record the primary WAL LSN produced by each write per account.
++// A read may only be served from the replica once the replica has replayed
++// past that LSN; otherwise the read is served from the primary. This makes
++// read-after-write deterministic regardless of how far the replica lags.
++type writeWatermark struct {
+ 	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
++	lsn map[string]string // account -> primary LSN at time of last write
+ }
+ 
+-func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++func newWriteWatermark() *writeWatermark {
++	return &writeWatermark{lsn: make(map[string]string)}
+ }
+ 
+-func (p *readWritePin) mark(account string) {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
++func (w *writeWatermark) mark(account, lsn string) {
++	w.mu.Lock()
++	defer w.mu.Unlock()
++	w.lsn[account] = lsn
+ }
+ 
+-func (p *readWritePin) pinned(account string) bool {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++func (w *writeWatermark) lsnFor(account string) (string, bool) {
++	w.mu.Lock()
++	defer w.mu.Unlock()
++	lsn, ok := w.lsn[account]
++	return lsn, ok
+ }
+ 
+ type server struct {
+ 	primary *sql.DB
+ 	replica *sql.DB
+-	pin     *readWritePin
++	wm      *writeWatermark
+ }
+ 
+ type depositRequest struct {
+@@ -67,17 +74,22 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	var balance int64
++	var lsn string
++	// Perform the write and capture the primary's current WAL position in the
++	// same round-trip so the watermark reflects exactly this write.
+ 	err := s.primary.QueryRow(
+-		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
++		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 "+
++			"RETURNING balance_cents, pg_current_wal_lsn()::text",
+ 		req.Amount, req.Account,
+-	).Scan(&balance)
++	).Scan(&balance, &lsn)
+ 	if err != nil {
+ 		http.Error(w, "write failed: "+err.Error(), http.StatusInternalServerError)
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
++	// Record the write position so subsequent reads of this account are not
++	// served from the replica until the replica has replayed past it.
++	s.wm.mark(req.Account, lsn)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -95,7 +107,9 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 
+ 	source := "replica"
+ 	db := s.replica
+-	if s.pin.pinned(account) {
++	// If the account has an outstanding write that the replica has not yet
++	// caught up to, the replica would return stale data: serve from primary.
++	if wantLSN, ok := s.wm.lsnFor(account); ok && !s.replicaCaughtUp(wantLSN) {
+ 		source = "primary"
+ 		db = s.primary
+ 	}
+@@ -118,6 +132,20 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	})
+ }
+ 
++// replicaCaughtUp reports whether the replica has replayed WAL up to (or past)
++// the given primary LSN. If the replica's position cannot be determined we
++// conservatively report false so the read is served from the primary.
++func (s *server) replicaCaughtUp(wantLSN string) bool {
++	var caughtUp bool
++	err := s.replica.QueryRow(
++		"SELECT pg_last_wal_replay_lsn() >= $1::pg_lsn", wantLSN,
++	).Scan(&caughtUp)
++	if err != nil {
++		return false
++	}
++	return caughtUp
++}
++
+ func readBalance(db *sql.DB, account string) (int64, error) {
+ 	var balance int64
+ 	err := db.QueryRow("SELECT balance_cents FROM accounts WHERE id = $1", account).Scan(&balance)
+@@ -158,17 +186,10 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
+-	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+-		if parsed, err := strconv.Atoi(v); err == nil {
+-			ttlMS = parsed
+-		}
+-	}
+-
+ 	s := &server{
+ 		primary: mustOpen(primaryDSN),
+ 		replica: mustOpen(replicaDSN),
+-		pin:     newReadWritePin(time.Duration(ttlMS) * time.Millisecond),
++		wm:      newWriteWatermark(),
+ 	}
+ 	defer s.primary.Close()
+ 	defer s.replica.Close()
+@@ -182,6 +203,6 @@ func main() {
+ 	if p := os.Getenv("PORT"); p != "" {
+ 		addr = ":" + p
+ 	}
+-	log.Printf("ledger-api listening on %s (pin ttl %dms)", addr, ttlMS)
++	log.Printf("ledger-api listening on %s (replica-lsn read-after-write)", addr)
+ 	log.Fatal(http.ListenAndServe(addr, mux))
+ }

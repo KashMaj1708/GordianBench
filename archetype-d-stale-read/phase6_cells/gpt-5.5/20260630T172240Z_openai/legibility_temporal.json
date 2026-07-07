@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T172240Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (read_your_writes) at event 8 precedes first edit at event 13",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "LSN catch-up SQL: 'pg_last_wal_replay_lsn'",
+  "correctness_basis": "LSN (canonical)",
+  "delivered_bytes": 5759,
+  "investigated": true,
+  "disambiguating_probes": 3,
+  "first_observation_ordinal": 8,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "set -e\nacct=acct-1\nbefore=$(curl -s \"$API_URL/balance?account=$acct\")\necho before:$before\nresp=$(curl -s -X POST \"$API_URL/deposit\" -H 'Content-Type: applicatio",
+  "first_edit_ordinal": 13,
+  "observation_precedes_fix": true
+}

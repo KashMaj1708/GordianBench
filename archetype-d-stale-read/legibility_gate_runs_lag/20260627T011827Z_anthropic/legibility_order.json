@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T011827Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 23 precedes named diagnosis at event 36",
+  "diagnosis_ordinal": 36,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 23,
+  "first_probe_cmd": "\n# Try with env password\nPGPASSWORD=bench psql -U bench -h postgres-primary -d ledger -c \"\\dt\"\n",
+  "probe_attempts": 11,
+  "probe_successes": 8,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

@@ -1,0 +1,47 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..715e8b4 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -40,6 +40,16 @@ func (p *readWritePin) pinned(account string) bool {
+ 	return ok && time.Now().Before(exp)
+ }
+ 
++// extend extends the pin's expiration time for an account.
++func (p *readWritePin) extend(account string, duration time.Duration) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	if exp, ok := p.exp[account]; ok {
++		newExp := exp.Add(duration)
++		p.exp[account] = newExp
++	}
++}
++
+ type server struct {
+ 	primary *sql.DB
+ 	replica *sql.DB
+@@ -78,6 +88,25 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 
+ 	// Client just wrote this account; serve its reads from the primary briefly.
+ 	s.pin.mark(req.Account)
++	
++	// Asynchronously wait for replication and keep the pin active until it catches up.
++	// If replication takes longer than expected, we extend the pin.
++	go func() {
++		account := req.Account
++		expectedBalance := balance
++		maxRetries := 50 // 50 * 100ms = 5 seconds max
++		for attempt := 0; attempt < maxRetries; attempt++ {
++			var replicaBalance int64
++			err := s.replica.QueryRow("SELECT balance_cents FROM accounts WHERE id = $1", account).Scan(&replicaBalance)
++			if err == nil && replicaBalance == expectedBalance {
++				// Replica has caught up; stop extending the pin
++				return
++			}
++			// Replica hasn't caught up yet; extend the pin by another 100ms
++			s.pin.extend(account, 100*time.Millisecond)
++			time.Sleep(100 * time.Millisecond)
++		}
++	}()
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,

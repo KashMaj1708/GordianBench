@@ -1,0 +1,188 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..b1d000f 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -8,36 +8,66 @@ import (
+ 	"os"
+ 	"strconv"
+ 	"sync"
+-	"time"
+ 
+ 	_ "github.com/lib/pq"
+ )
+ 
+-// readWritePin implements read-after-write consistency: for a short window after
+-// a client writes an account, that account's reads are served from the primary
+-// so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
++// readWritePin implements read-after-write consistency. For an account that a
++// client has written, that account's reads must reflect at least the value the
++// client just wrote. Replicas lag behind the primary by an unbounded amount, so
++// a fixed time window is NOT sufficient to guarantee this: if replication lag
++// exceeds the window, reads fall back to the replica and observe the stale,
++// pre-write value.
++//
++// Instead we remember the exact balance produced by each account's most recent
++// write. A replica read is only trusted once it reflects that value; until then
++// reads are served from the primary, which is always authoritative. The pin is
++// cleared lazily once the replica has demonstrably caught up, so the primary is
++// not loaded forever.
++//
++// Each write also bumps a per-account sequence number; the recorded value is
++// keyed to a sequence so a concurrent later write is never overwritten by an
++// older one and so catch-up is evaluated against the latest write.
++type writeRecord struct {
++	seq     uint64
++	balance int64
++}
++
+ type readWritePin struct {
+-	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
++	mu      sync.Mutex
++	seq     uint64
++	written map[string]writeRecord
++}
++
++func newReadWritePin() *readWritePin {
++	return &readWritePin{written: make(map[string]writeRecord)}
+ }
+ 
+-func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++// mark records the authoritative balance the client just wrote for account and
++// returns the sequence number assigned to this write.
++func (p *readWritePin) mark(account string, balance int64) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	p.seq++
++	p.written[account] = writeRecord{seq: p.seq, balance: balance}
+ }
+ 
+-func (p *readWritePin) mark(account string) {
++// expected returns the most recent written record for account (if any).
++func (p *readWritePin) expected(account string) (writeRecord, bool) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
++	rec, ok := p.written[account]
++	return rec, ok
+ }
+ 
+-func (p *readWritePin) pinned(account string) bool {
++// clear drops the pin only if the recorded record still matches the one we
++// validated (no newer write happened in the meantime).
++func (p *readWritePin) clear(account string, rec writeRecord) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++	if cur, ok := p.written[account]; ok && cur.seq == rec.seq {
++		delete(p.written, account)
++	}
+ }
+ 
+ type server struct {
+@@ -76,8 +106,9 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
++	// Record the authoritative value the client just wrote so subsequent reads
++	// never return an older value, regardless of replication lag.
++	s.pin.mark(req.Account, balance)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -93,29 +124,42 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
++	rec, pinned := s.pin.expected(account)
++
++	if !pinned {
++		// No outstanding write for this account: safe to read from the replica.
++		balance, err := readBalance(s.replica, account)
++		if err != nil {
++			// Replica unavailable; fall back to the primary.
++			balance, err = readBalance(s.primary, account)
++			if err != nil {
++				http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++				return
++			}
++			writeJSON(w, map[string]any{"account": account, "balance_cents": balance, "source": "primary"})
++			return
++		}
++		writeJSON(w, map[string]any{"account": account, "balance_cents": balance, "source": "replica"})
++		return
+ 	}
+ 
+-	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
++	// The account has an outstanding write. Trust the replica only once it has
++	// caught up to the exact value the client wrote; otherwise serve the
++	// authoritative value from the primary. This guarantees the read never
++	// returns a value older than the client's own write, no matter how far the
++	// replica lags.
++	if rbal, err := readBalance(s.replica, account); err == nil && rbal == rec.balance {
++		s.pin.clear(account, rec)
++		writeJSON(w, map[string]any{"account": account, "balance_cents": rbal, "source": "replica"})
++		return
+ 	}
++
++	balance, err := readBalance(s.primary, account)
+ 	if err != nil {
+ 		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
+ 		return
+ 	}
+-
+-	writeJSON(w, map[string]any{
+-		"account":       account,
+-		"balance_cents": balance,
+-		"source":        source,
+-	})
++	writeJSON(w, map[string]any{"account": account, "balance_cents": balance, "source": "primary"})
+ }
+ 
+ func readBalance(db *sql.DB, account string) (int64, error) {
+@@ -158,17 +202,17 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
++	// Retained for compatibility with existing deployment env; no longer used to
++	// bound correctness, since read-your-writes now depends on replica catch-up
++	// rather than a fixed time window.
+ 	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+-		if parsed, err := strconv.Atoi(v); err == nil {
+-			ttlMS = parsed
+-		}
++		_, _ = strconv.Atoi(v)
+ 	}
+ 
+ 	s := &server{
+ 		primary: mustOpen(primaryDSN),
+ 		replica: mustOpen(replicaDSN),
+-		pin:     newReadWritePin(time.Duration(ttlMS) * time.Millisecond),
++		pin:     newReadWritePin(),
+ 	}
+ 	defer s.primary.Close()
+ 	defer s.replica.Close()
+@@ -182,6 +226,6 @@ func main() {
+ 	if p := os.Getenv("PORT"); p != "" {
+ 		addr = ":" + p
+ 	}
+-	log.Printf("ledger-api listening on %s (pin ttl %dms)", addr, ttlMS)
++	log.Printf("ledger-api listening on %s", addr)
+ 	log.Fatal(http.ListenAndServe(addr, mux))
+ }

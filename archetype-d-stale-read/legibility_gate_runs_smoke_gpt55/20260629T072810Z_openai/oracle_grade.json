@@ -1,0 +1,11 @@
+{
+  "grade": "PASS",
+  "stale": 0,
+  "trials": 10,
+  "profile": "lag",
+  "lag_ms": 20000,
+  "sources": [
+    "primary"
+  ],
+  "build_error": null
+}

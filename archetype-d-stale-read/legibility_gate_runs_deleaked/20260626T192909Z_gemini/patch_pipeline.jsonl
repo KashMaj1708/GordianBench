@@ -1,0 +1,2 @@
+{"ts": 1782502143.065, "stage": "extraction", "run": "gemini/gemini-2.5-pro", "tried": ["workspace_git_diff", "workspace_patch_file"], "resolved_from": null, "workspace_files_present": []}
+{"ts": 1782502143.065, "stage": "auto_submit", "run": "gemini/gemini-2.5-pro", "ok": false, "reason": "no workspace edits and no patch file"}

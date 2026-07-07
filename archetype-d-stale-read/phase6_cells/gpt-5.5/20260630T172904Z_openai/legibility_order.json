@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T172904Z_openai",
+  "verdict": "NO_DIAGNOSIS",
+  "test2": "N/A",
+  "reason": "no named root cause in assistant text",
+  "diagnosis_ordinal": null,
+  "diagnosis_class": null,
+  "diagnosis_term": null,
+  "diagnosis_role": null,
+  "first_probe_ordinal": 8,
+  "first_probe_cmd": "psql \"$PRIMARY_URL\" -c '\\dt' && psql \"$PRIMARY_URL\" -c 'select * from accounts limit 5'",
+  "probe_attempts": 4,
+  "probe_successes": 4,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

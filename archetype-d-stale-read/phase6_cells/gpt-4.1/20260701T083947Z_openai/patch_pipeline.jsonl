@@ -1,0 +1,20 @@
+{"ts": 1782895108.349, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 1, "input_tokens": 654, "output_tokens": 17, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782895109.06, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 2, "input_tokens": 1944, "output_tokens": 30, "cache_read_input_tokens": 1792, "cache_creation_input_tokens": 0}
+{"ts": 1782895111.427, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 3, "input_tokens": 2015, "output_tokens": 25, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782895112.996, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 4, "input_tokens": 2084, "output_tokens": 26, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782895116.872, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 5, "input_tokens": 2189, "output_tokens": 76, "cache_read_input_tokens": 2048, "cache_creation_input_tokens": 0}
+{"ts": 1782895118.851, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 6, "input_tokens": 2633, "output_tokens": 42, "cache_read_input_tokens": 1792, "cache_creation_input_tokens": 0}
+{"ts": 1782895120.334, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 7, "input_tokens": 2707, "output_tokens": 36, "cache_read_input_tokens": 2560, "cache_creation_input_tokens": 0}
+{"ts": 1782895121.715, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 8, "input_tokens": 2784, "output_tokens": 36, "cache_read_input_tokens": 2176, "cache_creation_input_tokens": 0}
+{"ts": 1782895123.415, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 9, "input_tokens": 2852, "output_tokens": 33, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782895125.335, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 10, "input_tokens": 2908, "output_tokens": 51, "cache_read_input_tokens": 2816, "cache_creation_input_tokens": 0}
+{"ts": 1782895137.783, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 11, "input_tokens": 3016, "output_tokens": 586, "cache_read_input_tokens": 2944, "cache_creation_input_tokens": 0}
+{"ts": 1782895152.749, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 12, "input_tokens": 4878, "output_tokens": 1812, "cache_read_input_tokens": 3584, "cache_creation_input_tokens": 0}
+{"ts": 1782895153.834, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 13, "input_tokens": 6747, "output_tokens": 10, "cache_read_input_tokens": 2688, "cache_creation_input_tokens": 0}
+{"ts": 1782895153.835, "stage": "submit_attempt", "run": "openai/gpt-4.1", "turn": 13, "tool_call_id": "call_agt0mTXLcImAZVLeszLm11qc", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782895156.07, "stage": "content_check", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 1419, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": "s.pin.unpin(req.Account)\n+\n \twriteJSON(w, map[string]any{\n \t\t\"account\":       req.Account,\n \t\t\"balance_cents\": balance,\n", "ok": true}
+{"ts": 1782895156.999, "stage": "git_apply", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782895156.999, "stage": "extraction", "run": "openai/gpt-4.1", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782895182.328, "stage": "build", "run": "openai/gpt-4.1", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782895182.329, "stage": "accepted", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 1419}
+{"ts": 1782895182.329, "stage": "usage", "run": "openai/gpt-4.1", "input_tokens": 37411, "output_tokens": 2780, "cache_read_input_tokens": 28160, "cache_creation_input_tokens": 0}

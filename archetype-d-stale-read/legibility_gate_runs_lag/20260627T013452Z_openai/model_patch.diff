@@ -1,0 +1,38 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..7fb1650 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -20,24 +20,28 @@ import (
+ type readWritePin struct {
+ 	mu  sync.Mutex
+ 	ttl time.Duration
+-	exp map[string]time.Time
++	ts  map[string]time.Time // last write time for account
+ }
+ 
+ func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++	return &readWritePin{ttl: ttl, ts: make(map[string]time.Time)}
+ }
+ 
+ func (p *readWritePin) mark(account string) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
++	p.ts[account] = time.Now() // Stores wall+monotonic time
+ }
+ 
+ func (p *readWritePin) pinned(account string) bool {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++	ts, ok := p.ts[account]
++	if !ok {
++		return false
++	}
++	// Use time.Since which uses monotonic clock embedded in time.Time
++	return time.Since(ts) < p.ttl
+ }
+ 
+ type server struct {

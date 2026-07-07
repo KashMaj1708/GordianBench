@@ -1,0 +1,51 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..6a9469a 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -33,6 +33,12 @@ func (p *readWritePin) mark(account string) {
+ 	p.exp[account] = time.Now().Add(p.ttl)
+ }
+ 
++func (p *readWritePin) unpin(account string) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	delete(p.exp, account)
++}
++
+ func (p *readWritePin) pinned(account string) bool {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+@@ -76,8 +82,9 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
++	// Client just wrote this account; serve its reads from the primary until replica catches up.
+ 	s.pin.mark(req.Account)
++	go s.waitForReplica(req.Account, balance)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -86,6 +93,22 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	})
+ }
+ 
++// waitForReplica waits until the replica reflects the expected balance (or until a timeout), then unpins the account.
++func (s *server) waitForReplica(account string, expectedBalance int64) {
++	timeout := 2 * time.Second
++	interval := 50 * time.Millisecond
++	deadline := time.Now().Add(timeout)
++	for time.Now().Before(deadline) {
++		bal, err := readBalance(s.replica, account)
++		if err == nil && bal == expectedBalance {
++			s.pin.unpin(account)
++			return
++		}
++		time.Sleep(interval)
++	}
++	// If timeout, leave the pin active for its TTL
++}
++
+ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	account := r.URL.Query().Get("account")
+ 	if account == "" {

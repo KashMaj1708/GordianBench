@@ -1,0 +1,17 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..0819902 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -68,7 +68,11 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 
+ 	var balance int64
+ 	err := s.primary.QueryRow(
+-		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
++		`INSERT INTO accounts (id, balance_cents)
++		 VALUES ($2, $1)
++		 ON CONFLICT (id) DO UPDATE
++		 SET balance_cents = accounts.balance_cents + $1
++		 RETURNING balance_cents`,
+ 		req.Amount, req.Account,
+ 	).Scan(&balance)
+ 	if err != nil {

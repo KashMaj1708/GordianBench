@@ -1,0 +1,19 @@
+{"ts": 1782861913.621, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 1, "input_tokens": 2, "output_tokens": 67, "cache_read_input_tokens": 1484, "cache_creation_input_tokens": 0}
+{"ts": 1782861917.827, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 2, "input_tokens": 2, "output_tokens": 258, "cache_read_input_tokens": 1484, "cache_creation_input_tokens": 2238}
+{"ts": 1782861924.935, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 3, "input_tokens": 2, "output_tokens": 287, "cache_read_input_tokens": 3722, "cache_creation_input_tokens": 360}
+{"ts": 1782861934.446, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 4, "input_tokens": 2, "output_tokens": 326, "cache_read_input_tokens": 4082, "cache_creation_input_tokens": 688}
+{"ts": 1782861940.316, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 5, "input_tokens": 2, "output_tokens": 199, "cache_read_input_tokens": 4770, "cache_creation_input_tokens": 390}
+{"ts": 1782861950.317, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 6, "input_tokens": 2, "output_tokens": 513, "cache_read_input_tokens": 5160, "cache_creation_input_tokens": 369}
+{"ts": 1782861980.716, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 7, "input_tokens": 2, "output_tokens": 3031, "cache_read_input_tokens": 5529, "cache_creation_input_tokens": 558}
+{"ts": 1782861984.818, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 8, "input_tokens": 2, "output_tokens": 207, "cache_read_input_tokens": 6087, "cache_creation_input_tokens": 3109}
+{"ts": 1782861988.316, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 9, "input_tokens": 2, "output_tokens": 100, "cache_read_input_tokens": 9196, "cache_creation_input_tokens": 219}
+{"ts": 1782861995.474, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 10, "input_tokens": 2, "output_tokens": 329, "cache_read_input_tokens": 9415, "cache_creation_input_tokens": 129}
+{"ts": 1782861999.366, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 11, "input_tokens": 2, "output_tokens": 91, "cache_read_input_tokens": 9544, "cache_creation_input_tokens": 394}
+{"ts": 1782862010.243, "stage": "turn_usage", "run": "anthropic/claude-opus-4-8", "turn": 12, "input_tokens": 2, "output_tokens": 259, "cache_read_input_tokens": 9938, "cache_creation_input_tokens": 967}
+{"ts": 1782862010.243, "stage": "submit_attempt", "run": "anthropic/claude-opus-4-8", "turn": 12, "tool_call_id": "toolu_01YbQTzGvpmYT18wJVQ1hSws", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782862013.61, "stage": "content_check", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5979, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 6, "last_120_chars": "\n+\tlog.Printf(\"ledger-api listening on %s (LSN read-after-write)\", addr)\n \tlog.Fatal(http.ListenAndServe(addr, mux))\n }\n", "ok": true}
+{"ts": 1782862015.167, "stage": "git_apply", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782862015.167, "stage": "extraction", "run": "anthropic/claude-opus-4-8", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782862059.984, "stage": "build", "run": "anthropic/claude-opus-4-8", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782862059.984, "stage": "accepted", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5979}
+{"ts": 1782862059.984, "stage": "usage", "run": "anthropic/claude-opus-4-8", "input_tokens": 24, "output_tokens": 5667, "cache_read_input_tokens": 70411, "cache_creation_input_tokens": 9421}

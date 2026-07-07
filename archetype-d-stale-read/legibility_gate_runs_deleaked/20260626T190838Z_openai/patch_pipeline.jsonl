@@ -1,0 +1,5 @@
+{"ts": 1782500911.199, "stage": "submit_attempt", "run": "openai/gpt-4.1", "turn": 14, "tool_call_id": "call_o3PPKex31K7ijp31VhBkvuW6", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782500913.193, "stage": "content_check", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 825, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 1, "last_120_chars": "nt,\n \t).Scan(&balance)\n \tif err != nil {\n \t\thttp.Error(w, \"write failed: \"+err.Error(), http.StatusInternalServerError)\n", "ok": true}
+{"ts": 1782500914.066, "stage": "git_apply", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782500914.066, "stage": "extraction", "run": "openai/gpt-4.1", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782500914.066, "stage": "accepted", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 825}

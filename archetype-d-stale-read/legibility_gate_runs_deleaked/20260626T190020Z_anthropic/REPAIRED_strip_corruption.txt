@@ -1,0 +1,1 @@
+Restored a trailing blank context line removed by the sanitize_model_patch raw.strip() bug (see phase_5_report_9.md). Model delivery was valid; only the saved artifact was damaged.

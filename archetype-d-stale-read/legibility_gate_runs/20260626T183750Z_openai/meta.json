@@ -1,0 +1,9 @@
+{
+  "gate": "archetype-d-stale-read-legibility",
+  "provider": "openai",
+  "model": "gpt-4.1",
+  "turns_used": 12,
+  "patch_bytes": 444,
+  "patch_source": "workspace_git_diff",
+  "patch_death_stage": null
+}

@@ -1,0 +1,34 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..85881f8 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -51,6 +51,19 @@ type depositRequest struct {
+ 	Amount  int64  `json:"amount_cents"`
+ }
+ 
++// waitForReplica waits for the replica to reflect the expected balance for an account,
++// or returns after timeout.
++func (s *server) waitForReplica(account string, want int64, timeout time.Duration) {
++	deadline := time.Now().Add(timeout)
++	for time.Now().Before(deadline) {
++		balance, err := readBalance(s.replica, account)
++		if err == nil && balance == want {
++			return
++		}
++		time.Sleep(10 * time.Millisecond)
++	}
++}
++
+ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	if r.Method != http.MethodPost {
+ 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+@@ -79,6 +92,9 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	// Client just wrote this account; serve its reads from the primary briefly.
+ 	s.pin.mark(req.Account)
+ 
++	// Wait for replica to match primary (up to 200ms)
++	s.waitForReplica(req.Account, balance, 200*time.Millisecond)
++
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+ 		"balance_cents": balance,

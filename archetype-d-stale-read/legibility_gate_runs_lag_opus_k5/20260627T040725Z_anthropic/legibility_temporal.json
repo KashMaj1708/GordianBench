@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus_k5\\20260627T040725Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (read_your_writes) at event 8 precedes first edit at event 13",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "value/version catch-up: replica read compared to remembered write before trusting",
+  "correctness_basis": "value-catchup (unconfirmed)",
+  "delivered_bytes": 7419,
+  "investigated": true,
+  "disambiguating_probes": 3,
+  "first_observation_ordinal": 8,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "acct=acct-1\necho \"deposit...\"; curl -s -X POST $API_URL/deposit -d '{\"account\":\"acct-1\",\"amount_cents\":100}'; echo\nfor i in $(seq 1 20); do\n  curl -s \"$API_URL/",
+  "first_edit_ordinal": 13,
+  "observation_precedes_fix": true
+}

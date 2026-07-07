@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus\\20260627T032348Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) at event 4, before first successful runtime probe at event 11",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 11,
+  "first_probe_cmd": "sleep 3\ncurl -s \"$API_URL/balance?account=acct-1\"; echo\n# check replica directly\npsql \"$REPLICA_URL\" -t -c \"SELECT balance_cents FROM accounts WHERE id='acct-1';\" 2>&1\npsql \"$PRIMARY_URL\" -t -c \"SELECT balance_cents FROM accounts WHERE id='acct-1';\" 2>&1",
+  "probe_attempts": 4,
+  "probe_successes": 4,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

@@ -1,0 +1,124 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..c865ac1 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -21,23 +21,44 @@ type readWritePin struct {
+ 	mu  sync.Mutex
+ 	ttl time.Duration
+ 	exp map[string]time.Time
++	lsn map[string]string // new: for pinned accounts, record minimum WAL LSN to read from replica
+ }
+ 
+ func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time), lsn: make(map[string]string)}
+ }
+ 
+-func (p *readWritePin) mark(account string) {
++// mark now takes an LSN requirement
++func (p *readWritePin) mark(account string, lsn string) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+ 	p.exp[account] = time.Now().Add(p.ttl)
++	p.lsn[account] = lsn
+ }
+ 
+-func (p *readWritePin) pinned(account string) bool {
++// pinned returns (true, lsn) if pin is active, else (false, "")
++func (p *readWritePin) pinned(account string) (bool, string) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+ 	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++	if !ok || time.Now().After(exp) {
++		return false, ""
++	}
++	lsn := p.lsn[account]
++	return true, lsn
++}
++
++// cleanup removes expired pins
++func (p *readWritePin) cleanup() {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	now := time.Now()
++	for acc, exp := range p.exp {
++		if now.After(exp) {
++			delete(p.exp, acc)
++			delete(p.lsn, acc)
++		}
++	}
+ }
+ 
+ type server struct {
+@@ -75,9 +96,17 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		http.Error(w, "write failed: "+err.Error(), http.StatusInternalServerError)
+ 		return
+ 	}
++	
++	// Fetch primary's current WAL LSN after write
++	var lsn string
++	err = s.primary.QueryRow("SELECT pg_current_wal_lsn()").Scan(&lsn)
++	if err != nil {
++		http.Error(w, "could not get LSN: "+err.Error(), http.StatusInternalServerError)
++		return
++	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
++	// Pin account with required LSN
++	s.pin.mark(req.Account, lsn)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -86,6 +115,13 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	})
+ }
+ 
++// lsnCompare returns true if a >= b in Postgres LSN order, using pg_lsn
++func lsnCompare(db *sql.DB, a, b string) (bool, error) {
++	var res bool
++	err := db.QueryRow(`SELECT $1::pg_lsn >= $2::pg_lsn`, a, b).Scan(&res)
++	return res, err
++}
++
+ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	account := r.URL.Query().Get("account")
+ 	if account == "" {
+@@ -93,11 +129,33 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	s.pin.cleanup()
++
+ 	source := "replica"
+ 	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
++
++	pinned, reqLSN := s.pin.pinned(account)
++	if pinned {
++		// Is replica caught up?
++		var replLSN string
++		err := s.replica.QueryRow("SELECT pg_last_wal_replay_lsn()").Scan(&replLSN)
++		if err != nil {
++			// If can't check LSN, paranoid: read from primary
++			source = "primary"
++			db = s.primary
++		} else {
++			ok, err := lsnCompare(s.primary, replLSN, reqLSN)
++			if err != nil {
++				source = "primary"
++				db = s.primary
++			} else if !ok {
++				source = "primary"
++				db = s.primary
++			} else {
++				source = "replica"
++				db = s.replica
++			}
++		}
+ 	}
+ 
+ 	balance, err := readBalance(db, account)

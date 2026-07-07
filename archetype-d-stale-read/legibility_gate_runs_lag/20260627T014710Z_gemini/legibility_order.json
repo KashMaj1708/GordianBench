@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T014710Z_gemini",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'race condition' (race) at event 1, before first successful runtime probe at event 15",
+  "diagnosis_ordinal": 1,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 15,
+  "first_probe_cmd": "set -e\nACCOUNT_ID=\"acct-test-$$\"\n# Create account with a zero balance to start.\n# The problem is about stale reads, not missing accounts.\npsql $PRIMARY_URL -c \"INSERT INTO accounts (id, balance_cents) VALUES ('$ACCOUNT_ID', 0);\"\n\n# Now, run a test loop.\nfor i in $(seq 1 10); do\n  echo \"Loop $i\"\n  DEPOSIT_RESPONSE=$(curl -v --max-time 5 -s -X POST -H \"Content-Type: application/json\" -d \"{\\\"account\\\": \\\"$ACCOUNT_ID\\\", \\\"amount_cents\\\": 100}\" $API_URL/deposit)\n  if [ -z \"$DEPOSIT_RESPONSE\" ]; then\n    echo \"ERROR: Empty response from /deposit\"\n    exit 1\n  fi\n  EXPECTED_BALANCE=$(echo $DEPOSIT_RESPONSE | python3 -c 'import sys, json; print(json.load(sys.stdin)[\"balance_cents\"])')\n  \n  BALANCE_RESPONSE=$(curl -v --max-time 5 -s \"$API_URL/balance?account=$ACCOUNT_ID\")\n    if [ -z \"$BALANCE_RESPONSE\" ]; then\n    echo \"ERROR: Empty response from /balance\"\n    exit 1\n  fi\n  ACTUAL_BALANCE=$(echo $BALANCE_RESPONSE | python3 -c 'import sys, json; print(json.load(sys.stdin)[\"balance_cents\"])')\n\n  echo \"  expected $EXPECTED_BALANCE, got $ACTUAL_BALANCE\"\n  if [ \"$EXPECTED_BALANCE\" != \"$ACTUAL_BALANCE\" ]; then\n    echo \"BUG! Stale read detected.\"\n    # Exit on first failure.\n    exit 1\n  fi\ndone\n\necho \"No stale reads detected in 10 loops.\"\n# Clean up the test account.\npsql $PRIMARY_URL -c \"DELETE FROM accounts WHERE id = '$ACCOUNT_ID';\"\n",
+  "probe_attempts": 6,
+  "probe_successes": 1,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

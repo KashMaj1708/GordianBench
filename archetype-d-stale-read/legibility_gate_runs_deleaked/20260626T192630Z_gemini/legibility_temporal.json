@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_deleaked\\20260626T192630Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (UNRELATED: no change to read-routing / TTL / catch-up); investigated (1 disambiguating probe(s))",
+  "fix_mechanism": "UNRELATED",
+  "fix_evidence": "no change to read-routing / TTL / catch-up",
+  "correctness_basis": null,
+  "delivered_bytes": 634,
+  "investigated": true,
+  "disambiguating_probes": 1,
+  "first_observation_ordinal": 21,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "set -x\nacct_id=\"acct-$(uuidgen)\"\n# First deposit should create the account\ncurl -v -X POST -H \"Content-Type: application/json\" -d '{\"account\": \"'\"$acct_id\"'\", \"",
+  "first_edit_ordinal": 26,
+  "observation_precedes_fix": true
+}

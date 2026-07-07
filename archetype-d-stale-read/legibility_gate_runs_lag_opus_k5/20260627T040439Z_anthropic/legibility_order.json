@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus_k5\\20260627T040439Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) at event 4, before first successful runtime probe at event 11",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 11,
+  "first_probe_cmd": "curl -s -X POST $API_URL/deposit -d '{\"account\":\"acct-1\",\"amount_cents\":50}'; echo; sleep 0.4; curl -s \"$API_URL/balance?account=acct-1\"; echo \"primary direct:\"; psql \"$PRIMARY_URL\" -tAc \"SELECT balance_cents FROM accounts WHERE id='acct-1'\"; echo \"replica direct:\"; psql \"$REPLICA_URL\" -tAc \"SELECT balance_cents FROM accounts WHERE id='acct-1'\"",
+  "probe_attempts": 3,
+  "probe_successes": 3,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

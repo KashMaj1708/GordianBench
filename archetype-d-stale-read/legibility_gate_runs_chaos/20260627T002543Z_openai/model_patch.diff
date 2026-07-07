@@ -1,0 +1,58 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..ebae300 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -9,6 +9,8 @@ import (
+ 	"strconv"
+ 	"sync"
+ 	"time"
++	
++	"errors"
+ 
+ 	_ "github.com/lib/pq"
+ )
+@@ -68,8 +70,9 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 
+ 	var balance int64
+ 	err := s.primary.QueryRow(
+-		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
+-		req.Amount, req.Account,
++		"INSERT INTO accounts (id, balance_cents) VALUES ($1, $2) " +
++			"ON CONFLICT (id) DO UPDATE SET balance_cents = accounts.balance_cents + $2 RETURNING balance_cents",
++		req.Account, req.Amount,
+ 	).Scan(&balance)
+ 	if err != nil {
+ 		http.Error(w, "write failed: "+err.Error(), http.StatusInternalServerError)
+@@ -101,14 +104,25 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
+-	}
+ 	if err != nil {
+-		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
+-		return
++		if source == "primary" {
++			// If the primary doesn't have it, do NOT fallback to replica for not-found error.
++			if errors.Is(err, sql.ErrNoRows) {
++				http.Error(w, "read failed: account not found", http.StatusNotFound)
++				return
++			} else {
++				// For other primary errors, fallback to replica.
++				source = "replica"
++				balance, err = readBalance(s.replica, account)
++				if err != nil {
++					http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++					return
++				}
++			}
++		} else {
++			http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++			return
++		}
+ 	}
+ 
+ 	writeJSON(w, map[string]any{

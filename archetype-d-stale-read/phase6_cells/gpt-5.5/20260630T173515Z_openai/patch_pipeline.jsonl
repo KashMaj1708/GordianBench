@@ -1,0 +1,21 @@
+{"ts": 1782840623.267, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 1, "input_tokens": 738, "output_tokens": 31, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782840627.183, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 2, "input_tokens": 2034, "output_tokens": 182, "cache_read_input_tokens": 1664, "cache_creation_input_tokens": 0}
+{"ts": 1782840637.115, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 3, "input_tokens": 2218, "output_tokens": 513, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782840649.005, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 4, "input_tokens": 3306, "output_tokens": 480, "cache_read_input_tokens": 1664, "cache_creation_input_tokens": 0}
+{"ts": 1782840662.229, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 5, "input_tokens": 3786, "output_tokens": 312, "cache_read_input_tokens": 2176, "cache_creation_input_tokens": 0}
+{"ts": 1782840726.15, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 6, "input_tokens": 3960, "output_tokens": 4978, "cache_read_input_tokens": 3200, "cache_creation_input_tokens": 0}
+{"ts": 1782840728.044, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 7, "input_tokens": 6566, "output_tokens": 16, "cache_read_input_tokens": 3712, "cache_creation_input_tokens": 0}
+{"ts": 1782840736.36, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 8, "input_tokens": 7080, "output_tokens": 58, "cache_read_input_tokens": 6272, "cache_creation_input_tokens": 0}
+{"ts": 1782840740.486, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 9, "input_tokens": 7148, "output_tokens": 56, "cache_read_input_tokens": 6784, "cache_creation_input_tokens": 0}
+{"ts": 1782840743.614, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 10, "input_tokens": 7220, "output_tokens": 39, "cache_read_input_tokens": 6784, "cache_creation_input_tokens": 0}
+{"ts": 1782840766.442, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 11, "input_tokens": 7287, "output_tokens": 1179, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782840816.116, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 12, "input_tokens": 7341, "output_tokens": 3151, "cache_read_input_tokens": 6784, "cache_creation_input_tokens": 0}
+{"ts": 1782840838.354, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 13, "input_tokens": 8009, "output_tokens": 1152, "cache_read_input_tokens": 6784, "cache_creation_input_tokens": 0}
+{"ts": 1782840850.102, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 14, "input_tokens": 10344, "output_tokens": 531, "cache_read_input_tokens": 3712, "cache_creation_input_tokens": 0}
+{"ts": 1782840850.102, "stage": "submit_attempt", "run": "openai/gpt-5.5", "turn": 14, "tool_call_id": "call_DfwwpYEESn429vJJI8jItB0p", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782840853.501, "stage": "content_check", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "byte_len": 8210, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 6, "last_120_chars": "tl %dms)\", addr, ttlMS)\n+\tlog.Printf(\"ledger-api listening on %s\", addr)\n \tlog.Fatal(http.ListenAndServe(addr, mux))\n }\n", "ok": true}
+{"ts": 1782840855.226, "stage": "git_apply", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782840855.226, "stage": "extraction", "run": "openai/gpt-5.5", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782840906.928, "stage": "build", "run": "openai/gpt-5.5", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782840906.928, "stage": "accepted", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "byte_len": 8210}
+{"ts": 1782840906.928, "stage": "usage", "run": "openai/gpt-5.5", "input_tokens": 77037, "output_tokens": 12678, "cache_read_input_tokens": 49536, "cache_creation_input_tokens": 0}

@@ -1,0 +1,7 @@
+{
+  "gate": "archetype-d-stale-read-legibility",
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "turns_used": 14,
+  "patch_bytes": 0
+}

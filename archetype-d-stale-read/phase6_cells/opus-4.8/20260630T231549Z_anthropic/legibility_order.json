@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T231549Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) at event 4, before first successful runtime probe at event 8",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 8,
+  "first_probe_cmd": "curl -s \"$API_URL/health\"; echo\n# Check replica connection - is the replica actually a separate host through toxiproxy?\npsql \"$PRIMARY_URL\" -c \"SELECT id, balance_cents FROM accounts LIMIT 5;\" 2>&1 | head\necho \"--- replica ---\"\npsql \"$REPLICA_URL\" -c \"SELECT id, balance_cents FROM accounts LIMIT 5;\" 2>&1 | head",
+  "probe_attempts": 3,
+  "probe_successes": 3,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

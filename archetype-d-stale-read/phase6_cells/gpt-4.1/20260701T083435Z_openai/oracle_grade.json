@@ -1,0 +1,9 @@
+{
+  "grade": "BUILD_FAIL",
+  "stale": null,
+  "trials": 10,
+  "profile": "lag",
+  "lag_ms": 20000,
+  "sources": [],
+  "build_error": "------"
+}

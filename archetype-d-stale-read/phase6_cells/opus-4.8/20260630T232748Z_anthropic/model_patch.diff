@@ -1,0 +1,183 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..d318c05 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -6,44 +6,60 @@ import (
+ 	"log"
+ 	"net/http"
+ 	"os"
+-	"strconv"
+ 	"sync"
+-	"time"
+ 
+ 	_ "github.com/lib/pq"
+ )
+ 
+-// readWritePin implements read-after-write consistency: for a short window after
+-// a client writes an account, that account's reads are served from the primary
+-// so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
+-type readWritePin struct {
++// writeWatermark implements read-after-write consistency that is correct
++// regardless of how large replication lag is.
++//
++// The previous implementation pinned an account's reads to the primary for a
++// fixed time window (a TTL) after a write. That is only correct if replication
++// lag is always smaller than the TTL. When lag exceeds the window (e.g. a
++// degraded/slow replica), reads fall through to a replica that has not yet
++// replayed the write and return the stale, pre-deposit value.
++//
++// Instead of guessing with a clock, we record the primary WAL LSN produced by
++// each write. A read may only be served from the replica once the replica has
++// actually replayed up to (or past) that LSN. Until then the read is served
++// from the primary so the client always reads its own write.
++type writeWatermark struct {
+ 	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
++	lsn map[string]string // account -> primary WAL LSN at last write
+ }
+ 
+-func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++func newWriteWatermark() *writeWatermark {
++	return &writeWatermark{lsn: make(map[string]string)}
+ }
+ 
+-func (p *readWritePin) mark(account string) {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
++func (w *writeWatermark) mark(account, lsn string) {
++	w.mu.Lock()
++	defer w.mu.Unlock()
++	w.lsn[account] = lsn
+ }
+ 
+-func (p *readWritePin) pinned(account string) bool {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++func (w *writeWatermark) get(account string) (string, bool) {
++	w.mu.Lock()
++	defer w.mu.Unlock()
++	lsn, ok := w.lsn[account]
++	return lsn, ok
++}
++
++func (w *writeWatermark) clear(account, lsn string) {
++	w.mu.Lock()
++	defer w.mu.Unlock()
++	// Only clear if it still matches the LSN we observed as caught up, so we
++	// don't drop a newer write recorded concurrently.
++	if cur, ok := w.lsn[account]; ok && cur == lsn {
++		delete(w.lsn, account)
++	}
+ }
+ 
+ type server struct {
+ 	primary *sql.DB
+ 	replica *sql.DB
+-	pin     *readWritePin
++	wm      *writeWatermark
+ }
+ 
+ type depositRequest struct {
+@@ -67,17 +83,21 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	var balance int64
++	var lsn string
+ 	err := s.primary.QueryRow(
+-		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
++		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 "+
++			"RETURNING balance_cents, pg_current_wal_lsn()::text",
+ 		req.Amount, req.Account,
+-	).Scan(&balance)
++	).Scan(&balance, &lsn)
+ 	if err != nil {
+ 		http.Error(w, "write failed: "+err.Error(), http.StatusInternalServerError)
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
++	// Record the WAL position of this write; reads for this account must see a
++	// replica that has replayed at least up to here before being served from
++	// the replica.
++	s.wm.mark(req.Account, lsn)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -95,9 +115,18 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 
+ 	source := "replica"
+ 	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
++
++	if lsn, ok := s.wm.get(account); ok {
++		// There is an outstanding write for this account. Serve from the
++		// replica only if it has replayed past the recorded LSN; otherwise the
++		// replica is still stale and we must read the primary.
++		if s.replicaCaughtUp(lsn) {
++			// Replica is current; subsequent reads can use it freely.
++			s.wm.clear(account, lsn)
++		} else {
++			source = "primary"
++			db = s.primary
++		}
+ 	}
+ 
+ 	balance, err := readBalance(db, account)
+@@ -118,6 +147,21 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	})
+ }
+ 
++// replicaCaughtUp reports whether the replica has replayed WAL up to at least
++// the given LSN. If the status cannot be determined (e.g. the replica is the
++// primary, or the query errors) it conservatively returns false so reads stay
++// on the primary.
++func (s *server) replicaCaughtUp(lsn string) bool {
++	var caughtUp sql.NullBool
++	err := s.replica.QueryRow(
++		"SELECT pg_last_wal_replay_lsn() >= $1::pg_lsn", lsn,
++	).Scan(&caughtUp)
++	if err != nil {
++		return false
++	}
++	return caughtUp.Valid && caughtUp.Bool
++}
++
+ func readBalance(db *sql.DB, account string) (int64, error) {
+ 	var balance int64
+ 	err := db.QueryRow("SELECT balance_cents FROM accounts WHERE id = $1", account).Scan(&balance)
+@@ -158,17 +202,10 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
+-	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+-		if parsed, err := strconv.Atoi(v); err == nil {
+-			ttlMS = parsed
+-		}
+-	}
+-
+ 	s := &server{
+ 		primary: mustOpen(primaryDSN),
+ 		replica: mustOpen(replicaDSN),
+-		pin:     newReadWritePin(time.Duration(ttlMS) * time.Millisecond),
++		wm:      newWriteWatermark(),
+ 	}
+ 	defer s.primary.Close()
+ 	defer s.replica.Close()
+@@ -182,6 +219,6 @@ func main() {
+ 	if p := os.Getenv("PORT"); p != "" {
+ 		addr = ":" + p
+ 	}
+-	log.Printf("ledger-api listening on %s (pin ttl %dms)", addr, ttlMS)
++	log.Printf("ledger-api listening on %s (LSN read-after-write)", addr)
+ 	log.Fatal(http.ListenAndServe(addr, mux))
+ }

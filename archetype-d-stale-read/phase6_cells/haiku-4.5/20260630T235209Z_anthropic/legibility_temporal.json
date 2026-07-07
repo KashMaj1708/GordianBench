@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T235209Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (UNRELATED: no change to read-routing / TTL / catch-up); investigated (5 disambiguating probe(s))",
+  "fix_mechanism": "UNRELATED",
+  "fix_evidence": "no change to read-routing / TTL / catch-up",
+  "correctness_basis": null,
+  "delivered_bytes": 1368,
+  "investigated": true,
+  "disambiguating_probes": 5,
+  "first_observation_ordinal": 21,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# First, check current balance\ncurl -s \"$API_URL/balance?account=acct-1\"\necho \"\"\n\n# Make a deposit\ncurl -s -X POST \"$API_URL/deposit\" \\\n  -H \"Content-Type: appl",
+  "first_edit_ordinal": 57,
+  "observation_precedes_fix": true
+}

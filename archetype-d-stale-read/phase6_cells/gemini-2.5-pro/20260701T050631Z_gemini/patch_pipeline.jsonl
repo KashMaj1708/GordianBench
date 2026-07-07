@@ -1,0 +1,16 @@
+{"ts": 1782882202.369, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 1, "input_tokens": 802, "output_tokens": 71, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782882215.63, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 2, "input_tokens": 2762, "output_tokens": 908, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782882221.954, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 3, "input_tokens": 4010, "output_tokens": 84, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782882240.879, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 4, "input_tokens": 5983, "output_tokens": 1986, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782882258.619, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 5, "input_tokens": 8038, "output_tokens": 828, "cache_read_input_tokens": 4630, "cache_creation_input_tokens": 0}
+{"ts": 1782882262.479, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 6, "input_tokens": 9206, "output_tokens": 120, "cache_read_input_tokens": 4618, "cache_creation_input_tokens": 0}
+{"ts": 1782882273.792, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 7, "input_tokens": 11246, "output_tokens": 1993, "cache_read_input_tokens": 4655, "cache_creation_input_tokens": 0}
+{"ts": 1782882315.08, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 8, "input_tokens": 13308, "output_tokens": 854, "cache_read_input_tokens": 9350, "cache_creation_input_tokens": 0}
+{"ts": 1782882319.83, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 9, "input_tokens": 14502, "output_tokens": 221, "cache_read_input_tokens": 9325, "cache_creation_input_tokens": 0}
+{"ts": 1782882319.83, "stage": "submit_attempt", "run": "gemini/gemini-2.5-pro", "turn": 9, "tool_call_id": "gemini_f39970143967", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782882323.272, "stage": "content_check", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 1054, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": " account)\n-\t}\n \tif err != nil {\n \t\thttp.Error(w, \"read failed: \"+err.Error(), http.StatusInternalServerError)\n \t\treturn\n", "ok": true}
+{"ts": 1782882324.962, "stage": "git_apply", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782882324.962, "stage": "extraction", "run": "gemini/gemini-2.5-pro", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782882383.91, "stage": "build", "run": "gemini/gemini-2.5-pro", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782882383.91, "stage": "accepted", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 1054}
+{"ts": 1782882383.91, "stage": "usage", "run": "gemini/gemini-2.5-pro", "input_tokens": 69857, "output_tokens": 7065, "cache_read_input_tokens": 32578, "cache_creation_input_tokens": 0}

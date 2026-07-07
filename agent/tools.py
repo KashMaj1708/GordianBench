@@ -57,13 +57,26 @@ AGENT_TOOLS: list[ToolDef] = [
     ),
     ToolDef(
         name="submit_patch",
-        description="Submit final model_patch git diff for grading.",
+        description=(
+            "Signal that your fix is complete and should be graded. You do NOT need to "
+            "provide a diff: the harness computes the patch automatically from the edits "
+            "you made to the source files with write_file. Just edit the files, then call "
+            "submit_patch with no arguments. (Any model_patch/patch_path you pass is "
+            "logged but ignored — the workspace edits are the source of truth.)"
+        ),
         parameters={
             "type": "object",
             "properties": {
-                "model_patch": {"type": "string", "description": "Unified git diff"},
+                "model_patch": {
+                    "type": "string",
+                    "description": "Ignored. The harness reads your write_file edits instead.",
+                },
+                "patch_path": {
+                    "type": "string",
+                    "description": "Ignored. The harness reads your write_file edits instead.",
+                },
             },
-            "required": ["model_patch"],
+            "required": [],
         },
     ),
 ]

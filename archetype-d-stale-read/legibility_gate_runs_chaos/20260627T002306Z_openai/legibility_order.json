@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_chaos\\20260627T002306Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 8 precedes named diagnosis at event 33",
+  "diagnosis_ordinal": 33,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 8,
+  "first_probe_cmd": "psql \"$PRIMARY_URL\" -c \"CREATE TABLE IF NOT EXISTS accounts (id TEXT PRIMARY KEY, balance_cents BIGINT DEFAULT 0);\"",
+  "probe_attempts": 9,
+  "probe_successes": 8,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

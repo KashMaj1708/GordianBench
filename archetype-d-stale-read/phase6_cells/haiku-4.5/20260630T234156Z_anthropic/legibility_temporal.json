@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234156Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (NONE: empty patch); investigated (4 disambiguating probe(s))",
+  "fix_mechanism": "NONE",
+  "fix_evidence": "empty patch",
+  "correctness_basis": null,
+  "delivered_bytes": 0,
+  "investigated": true,
+  "disambiguating_probes": 4,
+  "first_observation_ordinal": 12,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "ACCT=\"acct-1\"\necho \"=== Testing deposit and balance for $ACCT ===\"\n\n# Clear by doing a fresh deposit\necho \"Clear:\"\ncurl -s -X POST http://ledger-api:8080/deposi",
+  "first_edit_ordinal": null,
+  "observation_precedes_fix": true
+}

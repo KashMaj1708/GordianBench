@@ -1,0 +1,25 @@
+{
+  "cell": "anthropic/claude-haiku-4-5-20251001",
+  "k": 5,
+  "run_dirs": [
+    "archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234156Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234529Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234852Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T235209Z_anthropic",
+    "archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T235437Z_anthropic"
+  ],
+  "rollup": {
+    "claude-haiku-4-5-20251001": {
+      "counts": {
+        "NO_PATCH": 2,
+        "CAPABILITY_FAIL": 3
+      },
+      "resolution_rate": 0.0,
+      "scored": 5,
+      "excluded": 0,
+      "needs_rerun": false
+    }
+  },
+  "frozen_config": "PRE_PHASE6.md",
+  "timestamp": "2026-07-01T00:02:07.472358+00:00"
+}

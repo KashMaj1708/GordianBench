@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-4.1\\20260701T084324Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 7 precedes named diagnosis at event 23",
+  "diagnosis_ordinal": 23,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 7,
+  "first_probe_cmd": "psql \"$PRIMARY_URL\" -c \"\\dt+ accounts\"",
+  "probe_attempts": 7,
+  "probe_successes": 7,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

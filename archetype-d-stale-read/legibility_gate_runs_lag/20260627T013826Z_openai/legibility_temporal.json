@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T013826Z_openai",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (NONE: empty patch); investigated (5 disambiguating probe(s))",
+  "fix_mechanism": "NONE",
+  "fix_evidence": "empty patch",
+  "correctness_basis": null,
+  "delivered_bytes": 0,
+  "investigated": true,
+  "disambiguating_probes": 5,
+  "first_observation_ordinal": 8,
+  "first_observation_kind": "primary_vs_replica",
+  "first_observation_cmd": "psql $PRIMARY_URL -c 'SELECT * FROM accounts;' && psql $REPLICA_URL -c 'SELECT * FROM accounts;'",
+  "first_edit_ordinal": null,
+  "observation_precedes_fix": true
+}

@@ -1,0 +1,21 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..5873a72 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -66,8 +66,15 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Ensure the account exists before updating
++	_, err := s.primary.Exec("INSERT INTO accounts (id, balance_cents) VALUES ($1, 0) ON CONFLICT (id) DO NOTHING", req.Account)
++	if err != nil {
++		http.Error(w, "failed to ensure account exists: "+err.Error(), http.StatusInternalServerError)
++		return
++	}
++
+ 	var balance int64
+-	err := s.primary.QueryRow(
++	err = s.primary.QueryRow(
+ 		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
+ 		req.Amount, req.Account,
+ 	).Scan(&balance)

@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gemini-2.5-pro\\20260701T050631Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); did not investigate (0 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 1054,
+  "investigated": false,
+  "disambiguating_probes": 0,
+  "first_observation_ordinal": null,
+  "first_observation_kind": null,
+  "first_observation_cmd": null,
+  "first_edit_ordinal": 11,
+  "observation_precedes_fix": false
+}

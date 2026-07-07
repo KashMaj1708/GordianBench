@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gemini-2.5-pro-smoke\\20260630T231052Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (UNRELATED: no change to read-routing / TTL / catch-up); did not investigate (0 disambiguating probe(s))",
+  "fix_mechanism": "UNRELATED",
+  "fix_evidence": "no change to read-routing / TTL / catch-up",
+  "correctness_basis": null,
+  "delivered_bytes": 1489,
+  "investigated": false,
+  "disambiguating_probes": 0,
+  "first_observation_ordinal": null,
+  "first_observation_kind": null,
+  "first_observation_cmd": null,
+  "first_edit_ordinal": 14,
+  "observation_precedes_fix": false
+}

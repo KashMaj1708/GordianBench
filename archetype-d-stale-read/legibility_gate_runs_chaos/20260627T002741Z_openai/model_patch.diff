@@ -1,0 +1,31 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..cb83200 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -67,7 +67,14 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	var balance int64
+-	err := s.primary.QueryRow(
++	tx, err := s.primary.Begin()
++	if err != nil {
++		http.Error(w, "write failed: "+err.Error(), http.StatusInternalServerError)
++		return
++	}
++	defer tx.Rollback() // Safe no-op if committed
++
++	err = tx.QueryRow(
+ 		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
+ 		req.Amount, req.Account,
+ 	).Scan(&balance)
+@@ -75,6 +82,10 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		http.Error(w, "write failed: "+err.Error(), http.StatusInternalServerError)
+ 		return
+ 	}
++	if err := tx.Commit(); err != nil {
++		http.Error(w, "commit failed: "+err.Error(), http.StatusInternalServerError)
++		return
++	}
+ 
+ 	// Client just wrote this account; serve its reads from the primary briefly.
+ 	s.pin.mark(req.Account)

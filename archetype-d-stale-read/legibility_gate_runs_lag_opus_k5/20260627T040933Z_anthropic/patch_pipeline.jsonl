@@ -1,0 +1,6 @@
+{"ts": 1782533366.341, "stage": "submit_attempt", "run": "anthropic/claude-opus-4-8", "turn": 11, "tool_call_id": "toolu_01Q8T2BKecjvc3BAP8CntLFW", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782533368.228, "stage": "content_check", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5829, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 5, "last_120_chars": "ger-api listening on %s (read-your-writes via WAL LSN watermark)\", addr)\n \tlog.Fatal(http.ListenAndServe(addr, mux))\n }\n", "ok": true}
+{"ts": 1782533369.131, "stage": "git_apply", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782533369.131, "stage": "extraction", "run": "anthropic/claude-opus-4-8", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782533369.131, "stage": "accepted", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5829}
+{"ts": 1782533369.131, "stage": "usage", "run": "anthropic/claude-opus-4-8", "input_tokens": 22, "output_tokens": 5517, "cache_read_input_tokens": 59989, "cache_creation_input_tokens": 9600}

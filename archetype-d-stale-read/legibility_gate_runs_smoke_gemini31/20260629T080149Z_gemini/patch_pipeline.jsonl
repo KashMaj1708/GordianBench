@@ -1,0 +1,33 @@
+{"ts": 1782719920.257, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 1, "input_tokens": 814, "output_tokens": 38, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719926.937, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 2, "input_tokens": 2835, "output_tokens": 19, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719929.275, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 3, "input_tokens": 3383, "output_tokens": 21, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719932.254, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 4, "input_tokens": 3453, "output_tokens": 30, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719937.309, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 5, "input_tokens": 3872, "output_tokens": 195, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719941.624, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 6, "input_tokens": 4282, "output_tokens": 64, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719945.365, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 7, "input_tokens": 4520, "output_tokens": 64, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719949.036, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 8, "input_tokens": 4847, "output_tokens": 205, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719953.371, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 9, "input_tokens": 5539, "output_tokens": 37, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719958.267, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 10, "input_tokens": 5822, "output_tokens": 22, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719961.44, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 11, "input_tokens": 6196, "output_tokens": 39, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719968.32, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 12, "input_tokens": 6297, "output_tokens": 53, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719971.687, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 13, "input_tokens": 7065, "output_tokens": 93, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719976.118, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 14, "input_tokens": 7358, "output_tokens": 23, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719979.565, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 15, "input_tokens": 7699, "output_tokens": 42, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719982.706, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 16, "input_tokens": 7995, "output_tokens": 30, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782719986.532, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 17, "input_tokens": 8237, "output_tokens": 30, "cache_read_input_tokens": 7913, "cache_creation_input_tokens": 0}
+{"ts": 1782719991.375, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 18, "input_tokens": 8403, "output_tokens": 18, "cache_read_input_tokens": 7909, "cache_creation_input_tokens": 0}
+{"ts": 1782719994.969, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 19, "input_tokens": 8587, "output_tokens": 28, "cache_read_input_tokens": 7906, "cache_creation_input_tokens": 0}
+{"ts": 1782720003.03, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 20, "input_tokens": 8770, "output_tokens": 17, "cache_read_input_tokens": 7903, "cache_creation_input_tokens": 0}
+{"ts": 1782720010.34, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 21, "input_tokens": 9334, "output_tokens": 28, "cache_read_input_tokens": 7912, "cache_creation_input_tokens": 0}
+{"ts": 1782720013.411, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 22, "input_tokens": 10168, "output_tokens": 26, "cache_read_input_tokens": 7926, "cache_creation_input_tokens": 0}
+{"ts": 1782720022.351, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 23, "input_tokens": 10296, "output_tokens": 186, "cache_read_input_tokens": 7922, "cache_creation_input_tokens": 0}
+{"ts": 1782720028.368, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 24, "input_tokens": 11381, "output_tokens": 37, "cache_read_input_tokens": 7940, "cache_creation_input_tokens": 0}
+{"ts": 1782720038.5, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 25, "input_tokens": 11918, "output_tokens": 13, "cache_read_input_tokens": 7945, "cache_creation_input_tokens": 0}
+{"ts": 1782720048.389, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 26, "input_tokens": 12678, "output_tokens": 202, "cache_read_input_tokens": 7953, "cache_creation_input_tokens": 0}
+{"ts": 1782720052.21, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 27, "input_tokens": 13434, "output_tokens": 30, "cache_read_input_tokens": 11941, "cache_creation_input_tokens": 0}
+{"ts": 1782720066.273, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 28, "input_tokens": 13862, "output_tokens": 23, "cache_read_input_tokens": 11943, "cache_creation_input_tokens": 0}
+{"ts": 1782720090.673, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 29, "input_tokens": 8544, "output_tokens": 27, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782720099.094, "stage": "turn_usage", "run": "gemini/gemini-3.1-pro-preview", "turn": 30, "input_tokens": 11444, "output_tokens": 206, "cache_read_input_tokens": 7971, "cache_creation_input_tokens": 0}
+{"ts": 1782720102.366, "stage": "extraction", "run": "gemini/gemini-3.1-pro-preview", "tried": ["workspace_git_diff", "workspace_patch_file"], "resolved_from": null, "workspace_files_present": []}
+{"ts": 1782720102.366, "stage": "auto_submit", "run": "gemini/gemini-3.1-pro-preview", "ok": false, "reason": "no workspace edits and no patch file"}
+{"ts": 1782720104.28, "stage": "usage", "run": "gemini/gemini-3.1-pro-preview", "input_tokens": 229033, "output_tokens": 1846, "cache_read_input_tokens": 111084, "cache_creation_input_tokens": 0}

@@ -1,0 +1,20 @@
+{
+  "cell": "gemini/gemini-2.5-pro",
+  "k": 1,
+  "run_dirs": [
+    "archetype-d-stale-read\\phase6_cells\\gemini-2.5-pro-smoke\\20260630T231052Z_gemini"
+  ],
+  "rollup": {
+    "gemini-2.5-pro": {
+      "counts": {
+        "CAPABILITY_FAIL": 1
+      },
+      "resolution_rate": 0.0,
+      "scored": 1,
+      "excluded": 0,
+      "needs_rerun": false
+    }
+  },
+  "frozen_config": "PRE_PHASE6.md",
+  "timestamp": "2026-06-30T23:12:41.128610+00:00"
+}

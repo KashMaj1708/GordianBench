@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs\\20260624T071032Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 4 precedes named diagnosis at event 27",
+  "diagnosis_ordinal": 27,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 4,
+  "first_probe_cmd": "curl -X POST \"$API_URL/deposit\" -d '{\"account\":\"acct-1\",\"amount_cents\":100}' -H 'Content-Type: application/json' && curl \"$API_URL/balance?account=acct-1\"",
+  "probe_attempts": 10,
+  "probe_successes": 6,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

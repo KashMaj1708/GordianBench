@@ -1,0 +1,83 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..5ecc7b2 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -16,21 +16,27 @@ import (
+ // readWritePin implements read-after-write consistency: for a short window after
+ // a client writes an account, that account's reads are served from the primary
+ // so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
++// offload the primary, but only after verifying the replica has caught up.
+ type readWritePin struct {
+-	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
++	mu       sync.Mutex
++	ttl      time.Duration
++	exp      map[string]time.Time
++	lastVal  map[string]int64
+ }
+ 
+ func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++	return &readWritePin{
++		ttl:     ttl,
++		exp:     make(map[string]time.Time),
++		lastVal: make(map[string]int64),
++	}
+ }
+ 
+-func (p *readWritePin) mark(account string) {
++func (p *readWritePin) mark(account string, balance int64) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+ 	p.exp[account] = time.Now().Add(p.ttl)
++	p.lastVal[account] = balance
+ }
+ 
+ func (p *readWritePin) pinned(account string) bool {
+@@ -40,6 +46,13 @@ func (p *readWritePin) pinned(account string) bool {
+ 	return ok && time.Now().Before(exp)
+ }
+ 
++func (p *readWritePin) getLastValue(account string) (int64, bool) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	val, ok := p.lastVal[account]
++	return val, ok
++}
++
+ type server struct {
+ 	primary *sql.DB
+ 	replica *sql.DB
+@@ -77,7 +90,8 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
++	// Store the new balance value so we can verify the replica has caught up.
++	s.pin.mark(req.Account, balance)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -95,9 +109,20 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 
+ 	source := "replica"
+ 	db := s.replica
++	
+ 	if s.pin.pinned(account) {
++		// Pin still active, use primary
+ 		source = "primary"
+ 		db = s.primary
++	} else if lastVal, ok := s.pin.getLastValue(account); ok {
++		// Pin expired, but we have a recent write. Check if replica caught up.
++		replicaVal, err := readBalance(s.replica, account)
++		if err != nil || replicaVal != lastVal {
++			// Replica either errored or hasn't caught up yet. Use primary.
++			source = "primary"
++			db = s.primary
++		}
++		// else: replica has caught up, use replica (already set above)
+ 	}
+ 
+ 	balance, err := readBalance(db, account)

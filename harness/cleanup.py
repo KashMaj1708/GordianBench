@@ -4,43 +4,60 @@ from __future__ import annotations
 
 import subprocess
 
+from harness.archetype_spec import ARCHETYPE_A, ARCHETYPE_D_STUB, default_spec
 from harness.hygiene import assert_resource_hygiene
-from harness.lifecycle import ARCHETYPE_ROOT, VARIANT_COMPOSE, teardown_stack
+from harness.lifecycle import teardown_stack
 from harness.workspace import teardown_agent_workspaces
+
+ARCHETYPE_ROOT = ARCHETYPE_A.root
+VARIANT_COMPOSE = ARCHETYPE_A.variant_compose
 
 
 def _teardown_patch_workspaces() -> None:
     """Down stacks started with dynamic patch overlays (not covered by VARIANT_COMPOSE)."""
-    ws_root = ARCHETYPE_ROOT / ".grade-workspaces"
-    if not ws_root.exists():
-        return
-    for overlay in ws_root.glob("patch-*/docker-compose.patch.yml"):
+    from harness.archetype_spec import _SPECS
+
+    for spec in _SPECS.values():
+        ws_root = spec.workspaces_root
+        if not ws_root.exists():
+            continue
+        for overlay in ws_root.glob("patch-*/docker-compose.patch.yml"):
+            subprocess.run(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    str(spec.compose_path(spec.base_compose)),
+                    "-f",
+                    str(overlay),
+                    "down",
+                    "--remove-orphans",
+                ],
+                cwd=spec.root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+
+def _compose_down_base() -> None:
+    from harness.archetype_spec import _SPECS
+
+    for spec in _SPECS.values():
         subprocess.run(
             [
                 "docker",
                 "compose",
                 "-f",
-                str(ARCHETYPE_ROOT / "docker-compose.yml"),
-                "-f",
-                str(overlay),
+                str(spec.compose_path(spec.base_compose)),
                 "down",
                 "--remove-orphans",
             ],
-            cwd=ARCHETYPE_ROOT,
+            cwd=spec.root,
             capture_output=True,
             text=True,
             check=False,
         )
-
-
-def _compose_down_base() -> None:
-    subprocess.run(
-        ["docker", "compose", "-f", str(ARCHETYPE_ROOT / "docker-compose.yml"), "down", "--remove-orphans"],
-        cwd=ARCHETYPE_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
 
 
 def _clear_toxics() -> None:
@@ -81,8 +98,11 @@ def ensure_clean_state(*, toxiproxy_url: str = "http://localhost:8474") -> None:
     _teardown_patch_workspaces()
     teardown_agent_workspaces()
 
-    for variant in VARIANT_COMPOSE:
-        teardown_stack(variant)
+    from harness.archetype_spec import _SPECS
+
+    for spec in _SPECS.values():
+        for variant in spec.variant_compose:
+            teardown_stack(variant, spec=spec)
 
     _compose_down_base()
 

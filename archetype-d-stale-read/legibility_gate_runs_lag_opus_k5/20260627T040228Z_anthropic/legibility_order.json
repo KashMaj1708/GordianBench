@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus_k5\\20260627T040228Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'replication lag' (stale-read) at event 4, before first successful runtime probe at event 8",
+  "diagnosis_ordinal": 4,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 8,
+  "first_probe_cmd": "set -e\nA=\"acct-probe-$RANDOM\"\npsql \"$PRIMARY_URL\" -c \"INSERT INTO accounts (id, balance_cents) VALUES ('$A', 0) ON CONFLICT (id) DO UPDATE SET balance_cents=0;\" >/dev/null\necho \"deposit:\"\ncurl -s -X POST \"$API_URL/deposit\" -H 'Content-Type: application/json' -d \"{\\\"account\\\":\\\"$A\\\",\\\"amount_cents\\\":500}\"\necho\n# repeatedly read balance for 1 second\nfor i in $(seq 1 20); do\n  curl -s \"$API_URL/balance?account=$A\"; echo\n  sleep 0.05\ndone",
+  "probe_attempts": 2,
+  "probe_successes": 2,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

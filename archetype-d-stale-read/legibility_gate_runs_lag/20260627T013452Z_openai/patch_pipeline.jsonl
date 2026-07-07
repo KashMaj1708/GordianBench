@@ -1,0 +1,5 @@
+{"ts": 1782524082.325, "stage": "submit_attempt", "run": "openai/gpt-4.1", "turn": 14, "tool_call_id": "call_PonMdxcvDptj0PcH9ZkQsiMl", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782524084.797, "stage": "content_check", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 1055, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 1, "last_120_chars": " time.Since which uses monotonic clock embedded in time.Time\n+\treturn time.Since(ts) < p.ttl\n }\n \n type server struct {\n", "ok": true}
+{"ts": 1782524086.014, "stage": "git_apply", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782524086.015, "stage": "extraction", "run": "openai/gpt-4.1", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782524086.015, "stage": "accepted", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 1055}

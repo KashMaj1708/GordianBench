@@ -1,0 +1,214 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..fd11ace 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -8,36 +8,64 @@ import (
+ 	"os"
+ 	"strconv"
+ 	"sync"
+-	"time"
+ 
+ 	_ "github.com/lib/pq"
+ )
+ 
+-// readWritePin implements read-after-write consistency: for a short window after
+-// a client writes an account, that account's reads are served from the primary
+-// so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
++// readWritePin implements read-after-write consistency: after a client writes an
++// account, that account's reads are served from the primary until we can prove
++// the replica has caught up to (at least) the version the client just wrote.
++//
++// The previous implementation pinned an account to the primary only for a fixed
++// time window (TTL). That is unsound: replication lag is not bounded by any
++// constant, so once the window expired a read could be routed to a replica that
++// had not yet applied the write, returning a stale (pre-deposit) balance. To be
++// correct, the pin must be released based on observed replica progress, not on
++// wall-clock time alone.
++//
++// We track, per account, a monotonically increasing version that is bumped on
++// every write. The pin is only released once the replica's observed value
++// matches the primary (i.e. it has applied the latest write). Until then reads
++// are served from the primary so the client always reads its own write.
+ type readWritePin struct {
+-	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
++	mu sync.Mutex
++	// version is the latest write version we have issued for an account.
++	version map[string]uint64
++	// counter is a process-wide monotonic source for write versions.
++	counter uint64
+ }
+ 
+-func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++func newReadWritePin() *readWritePin {
++	return &readWritePin{version: make(map[string]uint64)}
+ }
+ 
+-func (p *readWritePin) mark(account string) {
++// mark records that the account was just written and returns the version
++// assigned to that write.
++func (p *readWritePin) mark(account string) uint64 {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
++	p.counter++
++	p.version[account] = p.counter
++	return p.counter
+ }
+ 
+-func (p *readWritePin) pinned(account string) bool {
++// current returns whether the account is pinned and, if so, the version of the
++// most recent write to it.
++func (p *readWritePin) current(account string) (uint64, bool) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++	v, ok := p.version[account]
++	return v, ok
++}
++
++// release clears the pin for an account once the replica is known to be caught
++// up, but only if no newer write has happened since the version we verified.
++func (p *readWritePin) release(account string, verified uint64) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	if cur, ok := p.version[account]; ok && cur <= verified {
++		delete(p.version, account)
++	}
+ }
+ 
+ type server struct {
+@@ -76,7 +104,8 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
++	// Client just wrote this account; pin its reads to the primary until the
++	// replica has demonstrably caught up to this write.
+ 	s.pin.mark(req.Account)
+ 
+ 	writeJSON(w, map[string]any{
+@@ -93,31 +122,75 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
+-	}
++	if version, pinned := s.pin.current(account); pinned {
++		// Read-your-writes: serve from the primary so the client never observes
++		// a stale value. Opportunistically check whether the replica has caught
++		// up so the pin can be released and future reads can be offloaded.
++		balance, err := readBalance(s.primary, account)
++		if err != nil {
++			// Primary read path unavailable; fall back to the replica. This may
++			// be stale, but it is the only data available.
++			rb, rerr := readBalance(s.replica, account)
++			if rerr != nil {
++				http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++				return
++			}
++			writeJSON(w, map[string]any{
++				"account":       account,
++				"balance_cents": rb,
++				"source":        "replica",
++			})
++			return
++		}
+ 
+-	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
++		s.maybeReleasePin(account, version, balance)
++
++		writeJSON(w, map[string]any{
++			"account":       account,
++			"balance_cents": balance,
++			"source":        "primary",
++		})
++		return
+ 	}
++
++	// Not pinned: the replica is trusted to be current for this account.
++	balance, err := readBalance(s.replica, account)
+ 	if err != nil {
+-		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++		// Replica unavailable; fall back to the primary.
++		balance, err = readBalance(s.primary, account)
++		if err != nil {
++			http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++			return
++		}
++		writeJSON(w, map[string]any{
++			"account":       account,
++			"balance_cents": balance,
++			"source":        "primary",
++		})
+ 		return
+ 	}
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       account,
+ 		"balance_cents": balance,
+-		"source":        source,
++		"source":        "replica",
+ 	})
+ }
+ 
++// maybeReleasePin checks whether the replica has caught up to the primary value
++// for an account and, if so, releases the pin (provided no newer write has
++// occurred since the version we verified) so future reads can be served from the
++// replica again.
++func (s *server) maybeReleasePin(account string, verified uint64, primaryBalance int64) {
++	replicaBalance, err := readBalance(s.replica, account)
++	if err != nil {
++		return
++	}
++	if replicaBalance == primaryBalance {
++		s.pin.release(account, verified)
++	}
++}
++
+ func readBalance(db *sql.DB, account string) (int64, error) {
+ 	var balance int64
+ 	err := db.QueryRow("SELECT balance_cents FROM accounts WHERE id = $1", account).Scan(&balance)
+@@ -158,17 +231,18 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
++	// PIN_TTL_MS is retained for compatibility but no longer governs
++	// correctness; the pin is released based on observed replica progress.
+ 	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+-		if parsed, err := strconv.Atoi(v); err == nil {
+-			ttlMS = parsed
++		if _, err := strconv.Atoi(v); err != nil {
++			log.Printf("ignoring invalid PIN_TTL_MS=%q", v)
+ 		}
+ 	}
+ 
+ 	s := &server{
+ 		primary: mustOpen(primaryDSN),
+ 		replica: mustOpen(replicaDSN),
+-		pin:     newReadWritePin(time.Duration(ttlMS) * time.Millisecond),
++		pin:     newReadWritePin(),
+ 	}
+ 	defer s.primary.Close()
+ 	defer s.replica.Close()
+@@ -182,6 +256,6 @@ func main() {
+ 	if p := os.Getenv("PORT"); p != "" {
+ 		addr = ":" + p
+ 	}
+-	log.Printf("ledger-api listening on %s (pin ttl %dms)", addr, ttlMS)
++	log.Printf("ledger-api listening on %s (read-your-writes via replica catch-up)", addr)
+ 	log.Fatal(http.ListenAndServe(addr, mux))
+ }

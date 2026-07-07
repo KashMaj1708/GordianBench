@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus_k5\\20260627T040228Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (read_your_writes) at event 8 precedes first edit at event 13",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "value/version catch-up: replica read compared to remembered write before trusting",
+  "correctness_basis": "value-catchup (unconfirmed)",
+  "delivered_bytes": 6159,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 8,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "set -e\nA=\"acct-probe-$RANDOM\"\npsql \"$PRIMARY_URL\" -c \"INSERT INTO accounts (id, balance_cents) VALUES ('$A', 0) ON CONFLICT (id) DO UPDATE SET balance_cents=0;\"",
+  "first_edit_ordinal": 13,
+  "observation_precedes_fix": true
+}

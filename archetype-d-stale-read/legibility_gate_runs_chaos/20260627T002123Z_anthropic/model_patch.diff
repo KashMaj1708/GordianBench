@@ -1,0 +1,17 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..cdc2656 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -102,9 +102,9 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 
+ 	balance, err := readBalance(db, account)
+ 	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
++		// Primary read path unavailable; fall back to the primary again, not the replica,
++		// to avoid serving stale data from the replica when the pin is still active.
++		balance, err = readBalance(s.primary, account)
+ 	}
+ 	if err != nil {
+ 		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)

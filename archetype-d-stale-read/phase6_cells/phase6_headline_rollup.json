@@ -1,0 +1,61 @@
+{
+  "completed_cells": [
+    "gpt-5.5",
+    "claude-opus-4-8",
+    "claude-haiku-4-5-20251001",
+    "gemini-2.5-pro",
+    "gpt-4.1"
+  ],
+  "blocked_cells": [],
+  "rollup_by_model": {
+    "gpt-5.5": {
+      "counts": {
+        "PASS": 5
+      },
+      "resolution_rate": 1.0,
+      "scored": 5
+    },
+    "claude-opus-4-8": {
+      "counts": {
+        "PASS": 2,
+        "CAPABILITY_FAIL": 3
+      },
+      "resolution_rate": 0.4,
+      "scored": 5
+    },
+    "claude-haiku-4-5-20251001": {
+      "counts": {
+        "NO_PATCH": 2,
+        "CAPABILITY_FAIL": 3
+      },
+      "resolution_rate": 0.0,
+      "scored": 5
+    },
+    "gemini-2.5-pro": {
+      "counts": {
+        "CAPABILITY_FAIL": 5
+      },
+      "resolution_rate": 0.0,
+      "scored": 5
+    },
+    "gpt-4.1": {
+      "counts": {
+        "PASS": 2,
+        "CAPABILITY_FAIL": 2,
+        "BUILD_FAIL": 1
+      },
+      "resolution_rate": 0.4,
+      "scored": 5
+    }
+  },
+  "total": {
+    "counts": {
+      "PASS": 9,
+      "CAPABILITY_FAIL": 13,
+      "NO_PATCH": 2,
+      "BUILD_FAIL": 1
+    },
+    "resolution_rate": 0.36,
+    "scored": 25
+  }
+}

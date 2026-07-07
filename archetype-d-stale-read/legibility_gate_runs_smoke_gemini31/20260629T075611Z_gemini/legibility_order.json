@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_smoke_gemini31\\20260629T075611Z_gemini",
+  "verdict": "NO_DIAGNOSIS",
+  "test2": "N/A",
+  "reason": "no named root cause in assistant text",
+  "diagnosis_ordinal": null,
+  "diagnosis_class": null,
+  "diagnosis_term": null,
+  "diagnosis_role": null,
+  "first_probe_ordinal": 14,
+  "first_probe_cmd": "psql $PRIMARY_URL -c \"SELECT * FROM accounts WHERE id = 'acct-1'\"",
+  "probe_attempts": 8,
+  "probe_successes": 8,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

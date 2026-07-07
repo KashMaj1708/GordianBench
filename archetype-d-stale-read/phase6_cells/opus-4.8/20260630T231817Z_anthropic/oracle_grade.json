@@ -1,0 +1,12 @@
+{
+  "grade": "FAIL",
+  "stale": 9,
+  "trials": 10,
+  "profile": "lag",
+  "lag_ms": 20000,
+  "sources": [
+    "primary",
+    "replica"
+  ],
+  "build_error": null
+}

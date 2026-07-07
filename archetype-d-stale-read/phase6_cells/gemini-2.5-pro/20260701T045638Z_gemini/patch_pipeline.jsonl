@@ -1,0 +1,11 @@
+{"ts": 1782881722.126, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 1, "input_tokens": 802, "output_tokens": 161, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782881738.693, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 2, "input_tokens": 2852, "output_tokens": 363, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782881757.19, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 3, "input_tokens": 5103, "output_tokens": 1900, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782881767.068, "stage": "turn_usage", "run": "gemini/gemini-2.5-pro", "turn": 4, "input_tokens": 7071, "output_tokens": 25, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782881767.068, "stage": "submit_attempt", "run": "gemini/gemini-2.5-pro", "turn": 4, "tool_call_id": "gemini_56ca00d42c09", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782881771.658, "stage": "content_check", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 578, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 1, "last_120_chars": " account)\n-\t}\n \tif err != nil {\n \t\thttp.Error(w, \"read failed: \"+err.Error(), http.StatusInternalServerError)\n \t\treturn\n", "ok": true}
+{"ts": 1782881773.115, "stage": "git_apply", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782881773.115, "stage": "extraction", "run": "gemini/gemini-2.5-pro", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782881791.179, "stage": "build", "run": "gemini/gemini-2.5-pro", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782881791.179, "stage": "accepted", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 578}
+{"ts": 1782881791.179, "stage": "usage", "run": "gemini/gemini-2.5-pro", "input_tokens": 15828, "output_tokens": 2449, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}

@@ -1,0 +1,13 @@
+{
+  "gate": "archetype-d-stale-read-legibility",
+  "provider": "openai",
+  "model": "gpt-5.5",
+  "turns_used": 14,
+  "patch_bytes": 8210,
+  "patch_source": "workspace_git_diff",
+  "patch_death_stage": null,
+  "patch_reapplies": true,
+  "chaos_mode": "lag",
+  "chaos_lag_ms": 20000,
+  "build_check": true
+}

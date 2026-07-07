@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_deleaked\\20260626T192630Z_gemini",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'race condition' (race) at event 1, before first successful runtime probe at event 15",
+  "diagnosis_ordinal": 1,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 15,
+  "first_probe_cmd": "psql $PRIMARY_URL -c '\\l'",
+  "probe_attempts": 8,
+  "probe_successes": 3,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

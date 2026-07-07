@@ -1,0 +1,145 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..3f426d5 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -13,31 +13,45 @@ import (
+ 	_ "github.com/lib/pq"
+ )
+ 
+-// readWritePin implements read-after-write consistency: for a short window after
+-// a client writes an account, that account's reads are served from the primary
+-// so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
++// readWritePin tracks accounts for which this process has accepted a write that
++// may not have reached the replica yet.  Such accounts must not be served stale
++// replica data: reads use the primary until the replica is observed to contain at
++// least the balance returned by the write.
++//
++// A fixed time-based pin is not enough for read-after-write consistency because
++// replication lag is variable (and can be much longer than the chosen TTL during
++// network trouble).  The pin is therefore cleared by observing the replica catch
++// up, not by the wall clock.
+ type readWritePin struct {
+-	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
++	mu         sync.Mutex
++	minBalance map[string]int64
+ }
+ 
+-func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++func newReadWritePin(_ time.Duration) *readWritePin {
++	return &readWritePin{minBalance: make(map[string]int64)}
+ }
+ 
+-func (p *readWritePin) mark(account string) {
++func (p *readWritePin) mark(account string, balance int64) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
++	if current, ok := p.minBalance[account]; !ok || balance > current {
++		p.minBalance[account] = balance
++	}
++}
++
++func (p *readWritePin) minimum(account string) (int64, bool) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	balance, ok := p.minBalance[account]
++	return balance, ok
+ }
+ 
+-func (p *readWritePin) pinned(account string) bool {
++func (p *readWritePin) clearIfCaughtUp(account string, observedBalance int64) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++	if current, ok := p.minBalance[account]; ok && observedBalance >= current {
++		delete(p.minBalance, account)
++	}
+ }
+ 
+ type server struct {
+@@ -76,8 +90,9 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
++	// Client just wrote this account; do not let later reads return a replica
++	// value older than the balance acknowledged here.
++	s.pin.mark(req.Account, balance)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -93,28 +108,48 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
++	minBalance, pinned := s.pin.minimum(account)
++	if !pinned {
++		balance, err := readBalance(s.replica, account)
++		if err != nil {
++			http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++			return
++		}
++		writeJSON(w, map[string]any{
++			"account":       account,
++			"balance_cents": balance,
++			"source":        "replica",
++		})
++		return
+ 	}
+ 
+-	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
++	// Prefer the replica once it has caught up, but never return a value older
++	// than one already acknowledged by a successful deposit in this process.
++	replicaBalance, replicaErr := readBalance(s.replica, account)
++	if replicaErr == nil && replicaBalance >= minBalance {
++		s.pin.clearIfCaughtUp(account, replicaBalance)
++		writeJSON(w, map[string]any{
++			"account":       account,
++			"balance_cents": replicaBalance,
++			"source":        "replica",
++		})
++		return
+ 	}
++
++	balance, err := readBalance(s.primary, account)
+ 	if err != nil {
+-		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
++		if replicaErr != nil {
++			http.Error(w, "read failed: primary: "+err.Error()+"; replica: "+replicaErr.Error(), http.StatusInternalServerError)
++			return
++		}
++		http.Error(w, "read failed: primary unavailable and replica has not caught up", http.StatusServiceUnavailable)
+ 		return
+ 	}
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       account,
+ 		"balance_cents": balance,
+-		"source":        source,
++		"source":        "primary",
+ 	})
+ }
+ 
+@@ -182,6 +217,6 @@ func main() {
+ 	if p := os.Getenv("PORT"); p != "" {
+ 		addr = ":" + p
+ 	}
+-	log.Printf("ledger-api listening on %s (pin ttl %dms)", addr, ttlMS)
++	log.Printf("ledger-api listening on %s", addr)
+ 	log.Fatal(http.ListenAndServe(addr, mux))
+ }

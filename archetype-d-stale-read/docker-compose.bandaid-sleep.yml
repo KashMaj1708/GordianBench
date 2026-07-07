@@ -1,0 +1,7 @@
+# Band-aid: sleep before the read, hoping the replica catches up (treats the bug
+# as bounded lag). Must FAIL Tier 2: a partitioned replica never catches up.
+services:
+  ledger-api:
+    image: archetype-d-stale-read-ledger-api:bandaid-sleep
+    build:
+      context: ./patches/bandaid-sleep/ledger-api

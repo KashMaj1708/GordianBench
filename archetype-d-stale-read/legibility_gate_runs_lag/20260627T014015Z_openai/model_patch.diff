@@ -1,0 +1,27 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..259e95b 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -17,6 +17,10 @@ import (
+ // a client writes an account, that account's reads are served from the primary
+ // so the client reads its own write. Reads outside the window use the replica to
+ // offload the primary.
++//
++// NOTE: This implementation stores pin state in memory. In multi-instance
++// deployments, use a shared cache (e.g. Redis) for correct read-your-write
++// semantics across all service instances.
+ type readWritePin struct {
+ 	mu  sync.Mutex
+ 	ttl time.Duration
+@@ -158,7 +162,10 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
++	// Increase default pin ttl to 2000ms (2s), to account for replica lag and reduce consistency bugs.
++	// Configure via PIN_TTL_MS env var if desired.
++	// NOTE: In production with multi-instance deployments, use a centralized cache for pin state.
++	ttlMS := 2000
+ 	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+ 		if parsed, err := strconv.Atoi(v); err == nil {
+ 			ttlMS = parsed

@@ -1,0 +1,15 @@
+{"ts": 1782839659.909, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 1, "input_tokens": 738, "output_tokens": 30, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782839664.886, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 2, "input_tokens": 2034, "output_tokens": 266, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782839672.102, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 3, "input_tokens": 2272, "output_tokens": 191, "cache_read_input_tokens": 1664, "cache_creation_input_tokens": 0}
+{"ts": 1782839686.137, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 4, "input_tokens": 2448, "output_tokens": 707, "cache_read_input_tokens": 2176, "cache_creation_input_tokens": 0}
+{"ts": 1782839720.718, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 5, "input_tokens": 2865, "output_tokens": 188, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782839750.557, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 6, "input_tokens": 3015, "output_tokens": 2201, "cache_read_input_tokens": 2688, "cache_creation_input_tokens": 0}
+{"ts": 1782839752.668, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 7, "input_tokens": 4279, "output_tokens": 16, "cache_read_input_tokens": 2176, "cache_creation_input_tokens": 0}
+{"ts": 1782839766.301, "stage": "turn_usage", "run": "openai/gpt-5.5", "turn": 8, "input_tokens": 4793, "output_tokens": 231, "cache_read_input_tokens": 4224, "cache_creation_input_tokens": 0}
+{"ts": 1782839766.301, "stage": "submit_attempt", "run": "openai/gpt-5.5", "turn": 8, "tool_call_id": "call_U1qrwmRLdrG7UeBI44YuSPuM", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782839770.021, "stage": "content_check", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "byte_len": 3429, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 6, "last_120_chars": "tl %dms)\", addr, ttlMS)\n+\tlog.Printf(\"ledger-api listening on %s\", addr)\n \tlog.Fatal(http.ListenAndServe(addr, mux))\n }\n", "ok": true}
+{"ts": 1782839781.936, "stage": "git_apply", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782839781.936, "stage": "extraction", "run": "openai/gpt-5.5", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782839850.742, "stage": "build", "run": "openai/gpt-5.5", "ok": true, "attempt": 1, "stderr_tail": ""}
+{"ts": 1782839850.742, "stage": "accepted", "run": "openai/gpt-5.5", "source": "workspace_git_diff", "byte_len": 3429}
+{"ts": 1782839850.744, "stage": "usage", "run": "openai/gpt-5.5", "input_tokens": 22444, "output_tokens": 3830, "cache_read_input_tokens": 12928, "cache_creation_input_tokens": 0}

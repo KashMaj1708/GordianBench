@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T235437Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 18 precedes named diagnosis at event 22",
+  "diagnosis_ordinal": 22,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 18,
+  "first_probe_cmd": "python3 << 'EOF'\nimport requests\nimport time\nimport json\n\nAPI_URL = \"http://ledger-api:8080\"\naccount = \"acct-1\"\n\n# Clear and check\nprint(\"=== Starting test ===\")\n\n# Multiple iterations to catch the intermittent bug\nfor iteration in range(10):\n    print(f\"\\nIteration {iteration + 1}:\")\n    \n    # Deposit\n    deposit_amount = 100 * (iteration + 1)\n    resp = requests.post(f\"{API_URL}/deposit\", json={\n        \"account\": account,\n        \"amount_cents\": deposit_amount\n    })\n    deposit_json = resp.json()\n    balance_after_deposit = deposit_json.get('balance_cents')\n    print(f\"  POST /deposit: balance={balance_after_deposit}, source={deposit_json.get('source')}\")\n    \n    # Read immediately with tiny delays\n    mismatch = False\n    for attempt in range(5):\n        time.sleep(0.002)  # 2ms delay\n        resp = requests.get(f\"{API_URL}/balance\", params={\"account\": account})\n        read_json = resp.json()\n        balance_from_read = read_json.get('balance_cents')\n        source = read_json.get('source')\n        \n        if balance_from_read != balance_after_deposit:\n            print(f\"  ! GET /balance (attempt {attempt+1}): balance={balance_from_read} (expected {balance_after_deposit}), source={source}\")\n            mismatch = True\n        else:\n            print(f\"  \u2713 GET /balance (attempt {attempt+1}): balance={balance_from_read}, source={source}\")\n    \n    if mismatch:\n        print(f\"  ^^^ CONSISTENCY BUG DETECTED ^^^\")\n\nEOF\n",
+  "probe_attempts": 3,
+  "probe_successes": 1,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

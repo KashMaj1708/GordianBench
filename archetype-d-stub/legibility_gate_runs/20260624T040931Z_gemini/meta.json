@@ -1,0 +1,7 @@
+{
+  "gate": "archetype-d-stub-legibility",
+  "provider": "gemini",
+  "model": "gemini-2.5-pro",
+  "turns_used": 12,
+  "patch_bytes": 0
+}

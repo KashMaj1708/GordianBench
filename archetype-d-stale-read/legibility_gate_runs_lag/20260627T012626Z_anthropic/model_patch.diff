@@ -1,0 +1,13 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..8fcc63b 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -158,7 +158,7 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
++	ttlMS := 2000
+ 	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+ 		if parsed, err := strconv.Atoi(v); err == nil {
+ 			ttlMS = parsed

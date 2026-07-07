@@ -1,27 +1,22 @@
-"""Compose stack lifecycle for Archetype A grading."""
+"""Compose stack lifecycle — archetype injected via ArchetypeSpec."""
 
 from __future__ import annotations
 
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING
+
+from harness.archetype_spec import ARCHETYPE_A, ArchetypeSpec, default_spec
 
 if TYPE_CHECKING:
     from harness.patch import PatchWorkspace
 
-ARCHETYPE_ROOT = Path(__file__).resolve().parents[1] / "archetype-a"
+# Backward compatibility for archetype-a-only call sites.
+ARCHETYPE_ROOT = ARCHETYPE_A.root
+VARIANT_COMPOSE = ARCHETYPE_A.variant_compose
 
-VARIANT_COMPOSE: dict[str, list[str]] = {
-    "broken": ["docker-compose.yml"],
-    "fixed": ["docker-compose.yml", "docker-compose.fixed.yml"],
-    "bandaid-timeout": ["docker-compose.yml", "docker-compose.bandaid-timeout.yml"],
-    "bandaid-retry": ["docker-compose.yml", "docker-compose.bandaid-retry.yml"],
-    "bandaid-rewrite": ["docker-compose.yml", "docker-compose.bandaid-rewrite.yml"],
-}
-
-# Tracks last deploy for variant-switch image freshness checks.
 _last_variant: str | None = None
 _last_fingerprints: dict | None = None
 
@@ -29,17 +24,26 @@ _last_fingerprints: dict | None = None
 @dataclass
 class StackSession:
     variant: str
-    gateway_url: str = "http://localhost:8080"
-    database_url: str = "postgresql://bench:bench@localhost:5433/payments"
-    toxiproxy_url: str = "http://localhost:8474"
+    spec: ArchetypeSpec
+    gateway_url: str
+    database_url: str
+    toxiproxy_url: str | None
+
+    def __init__(self, variant: str, spec: ArchetypeSpec | None = None):
+        s = spec or default_spec()
+        self.variant = variant
+        self.spec = s
+        self.gateway_url = s.gateway_url
+        self.database_url = s.database_url
+        self.toxiproxy_url = s.toxiproxy_url
 
     def compose_files(self) -> list[str]:
-        return VARIANT_COMPOSE[self.variant]
+        return self.spec.variant_compose[self.variant]
 
     def compose_cmd(self, *args: str) -> list[str]:
         cmd = ["docker", "compose"]
         for f in self.compose_files():
-            cmd.extend(["-f", str(ARCHETYPE_ROOT / f)])
+            cmd.extend(["-f", str(self.spec.compose_path(f))])
         cmd.extend(args)
         return cmd
 
@@ -49,16 +53,25 @@ class PatchStackSession:
     """Stack session for dynamically patched src (content-hash image tags)."""
 
     workspace: PatchWorkspace
-    gateway_url: str = "http://localhost:8080"
-    database_url: str = "postgresql://bench:bench@localhost:5433/payments"
-    toxiproxy_url: str = "http://localhost:8474"
+    spec: ArchetypeSpec
+    gateway_url: str
+    database_url: str
+    toxiproxy_url: str | None
+
+    def __init__(self, workspace: PatchWorkspace, spec: ArchetypeSpec | None = None):
+        s = spec or workspace.spec
+        self.workspace = workspace
+        self.spec = s
+        self.gateway_url = s.gateway_url
+        self.database_url = s.database_url
+        self.toxiproxy_url = s.toxiproxy_url
 
     def compose_cmd(self, *args: str) -> list[str]:
         cmd = [
             "docker",
             "compose",
             "-f",
-            str(ARCHETYPE_ROOT / "docker-compose.yml"),
+            str(self.spec.compose_path(self.spec.base_compose)),
             "-f",
             str(self.workspace.compose_overlay),
         ]
@@ -66,8 +79,8 @@ class PatchStackSession:
         return cmd
 
 
-def _run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:
-    proc = subprocess.run(cmd, cwd=ARCHETYPE_ROOT, check=False, capture_output=True, text=True)
+def _run(cmd: list[str], *, cwd, check: bool = True) -> subprocess.CompletedProcess:
+    proc = subprocess.run(cmd, cwd=cwd, check=False, capture_output=True, text=True)
     if check and proc.returncode != 0:
         detail = "\n".join(
             s for s in [(proc.stderr or "").strip(), (proc.stdout or "").strip()] if s
@@ -77,12 +90,25 @@ def _run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:
     return proc
 
 
-def deploy_patch(workspace: PatchWorkspace) -> PatchStackSession:
-    """Deploy stack built from dynamically patched src."""
-    from harness.hygiene import get_running_image_fingerprints, verify_patch_images
+def _clear_toxics(spec: ArchetypeSpec) -> None:
+    if not spec.toxiproxy_url:
+        return
+    sys.path.insert(0, str(spec.root))
+    try:
+        from tests.toxiproxy_chaos import clear_chaos
 
-    session = PatchStackSession(workspace=workspace)
-    _run(session.compose_cmd("up", "-d", "--build"))
+        clear_chaos()
+    except Exception:
+        pass
+
+
+def deploy_patch(workspace: PatchWorkspace, *, spec: ArchetypeSpec | None = None) -> PatchStackSession:
+    """Deploy stack built from dynamically patched src."""
+    from harness.hygiene import verify_patch_images
+
+    s = spec or workspace.spec
+    session = PatchStackSession(workspace=workspace, spec=s)
+    _run(session.compose_cmd("up", "-d", "--build"), cwd=s.root)
 
     errors = verify_patch_images(session)
     if errors:
@@ -91,23 +117,15 @@ def deploy_patch(workspace: PatchWorkspace) -> PatchStackSession:
     return session
 
 
-def teardown_patch(workspace: PatchWorkspace) -> None:
+def teardown_patch(workspace: PatchWorkspace, *, spec: ArchetypeSpec | None = None) -> None:
     """Stop patch stack and clear toxics."""
-    import sys
-
-    sys.path.insert(0, str(ARCHETYPE_ROOT))
-    try:
-        from tests.toxiproxy_chaos import clear_chaos
-
-        clear_chaos()
-    except Exception:
-        pass
-
-    session = PatchStackSession(workspace=workspace)
-    _run(session.compose_cmd("down", "--remove-orphans"), check=False)
+    s = spec or workspace.spec
+    _clear_toxics(s)
+    session = PatchStackSession(workspace=workspace, spec=s)
+    _run(session.compose_cmd("down", "--remove-orphans"), cwd=s.root, check=False)
 
 
-def deploy_variant(variant: str) -> None:
+def deploy_variant(variant: str, *, spec: ArchetypeSpec | None = None) -> None:
     """Deploy variant; verify image IDs match tags and variant switches refresh gateway."""
     global _last_variant, _last_fingerprints
 
@@ -117,8 +135,9 @@ def deploy_variant(variant: str) -> None:
         verify_variant_images,
     )
 
-    session = StackSession(variant=variant)
-    _run(session.compose_cmd("up", "-d", "--build"))
+    s = spec or default_spec()
+    session = StackSession(variant=variant, spec=s)
+    _run(session.compose_cmd("up", "-d", "--build"), cwd=s.root)
 
     current = get_running_image_fingerprints(session)
     switch_stale = assert_variant_switch_fresh(
@@ -144,58 +163,51 @@ def reset_deploy_tracking() -> None:
     _last_fingerprints = None
 
 
-def teardown_stack(variant: str | None = None) -> None:
+def teardown_stack(variant: str | None = None, *, spec: ArchetypeSpec | None = None) -> None:
     """Stop stack and clear chaos toxics."""
-    import sys
-
-    sys.path.insert(0, str(ARCHETYPE_ROOT))
-    try:
-        from tests.toxiproxy_chaos import clear_chaos
-
-        clear_chaos()
-    except Exception:
-        pass
+    s = spec or default_spec()
+    _clear_toxics(s)
 
     if variant is not None:
-        session = StackSession(variant=variant)
-        _run(session.compose_cmd("down", "--remove-orphans"), check=False)
+        session = StackSession(variant=variant, spec=s)
+        _run(session.compose_cmd("down", "--remove-orphans"), cwd=s.root, check=False)
 
 
-def wait_for_healthy(timeout: float = 120.0) -> None:
-    import sys
-
-    sys.path.insert(0, str(ARCHETYPE_ROOT))
-    from tests.helpers import wait_for_gateway
-
-    wait_for_gateway(timeout=timeout)
+def wait_for_healthy(*, spec: ArchetypeSpec | None = None, timeout: float = 120.0) -> None:
+    s = spec or default_spec()
+    sys.path.insert(0, str(s.root))
+    helpers = s.import_observation_helpers()
+    wait_fn = getattr(helpers, "wait_for_api", None) or helpers.wait_for_gateway
+    wait_fn(timeout=timeout)
     time.sleep(1)
 
 
 class patch_session:
     """Context manager: apply patch, deploy, wait healthy, teardown workspace on exit."""
 
-    def __init__(self, model_patch: str):
+    def __init__(self, model_patch: str, *, spec: ArchetypeSpec | None = None):
         from harness.patch import apply_model_patch, remove_workspace
 
+        self.spec = spec or default_spec()
         self._remove_workspace = remove_workspace
-        self.workspace = apply_model_patch(model_patch)
-        self.session = PatchStackSession(workspace=self.workspace)
+        self.workspace = apply_model_patch(model_patch, spec=self.spec)
+        self.session = PatchStackSession(workspace=self.workspace, spec=self.spec)
         self._deployed = False
 
     def __enter__(self) -> PatchStackSession:
         try:
-            deploy_patch(self.workspace)
+            deploy_patch(self.workspace, spec=self.spec)
             self._deployed = True
-            wait_for_healthy()
+            wait_for_healthy(spec=self.spec)
             return self.session
         except Exception:
-            teardown_patch(self.workspace)
+            teardown_patch(self.workspace, spec=self.spec)
             self._remove_workspace(self.workspace)
             raise
 
     def __exit__(self, exc_type, exc, tb) -> None:
         if self._deployed:
-            teardown_patch(self.workspace)
+            teardown_patch(self.workspace, spec=self.spec)
         self._remove_workspace(self.workspace)
         return False
 
@@ -203,22 +215,23 @@ class patch_session:
 class stack_session:
     """Context manager: deploy variant, wait healthy, teardown + clear toxics on exit."""
 
-    def __init__(self, variant: str):
+    def __init__(self, variant: str, *, spec: ArchetypeSpec | None = None):
+        self.spec = spec or default_spec()
         self.variant = variant
-        self.session = StackSession(variant=variant)
+        self.session = StackSession(variant=variant, spec=self.spec)
         self._deployed = False
 
     def __enter__(self) -> StackSession:
         try:
-            deploy_variant(self.variant)
+            deploy_variant(self.variant, spec=self.spec)
             self._deployed = True
-            wait_for_healthy()
+            wait_for_healthy(spec=self.spec)
             return self.session
         except Exception:
-            teardown_stack(self.variant)
+            teardown_stack(self.variant, spec=self.spec)
             raise
 
     def __exit__(self, exc_type, exc, tb) -> None:
         if self._deployed:
-            teardown_stack(self.variant)
+            teardown_stack(self.variant, spec=self.spec)
         return False

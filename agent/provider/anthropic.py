@@ -10,6 +10,14 @@ from agent.tools import ToolDef
 from agent.types import AssistantTurn, Message, Role, StopReason, TextBlock, ToolCall, Usage
 
 
+_CACHE_CONTROL = {"type": "ephemeral"}
+
+
+def _mark_cache(block: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of an Anthropic content/tool block with a cache breakpoint."""
+    return {**block, "cache_control": _CACHE_CONTROL}
+
+
 def _map_stop_reason(raw: str) -> StopReason:
     if raw in ("tool_use", "tool_calls"):
         return StopReason.WANTS_TOOL
@@ -72,9 +80,20 @@ def _serialize_messages(history: list[Message]) -> list[dict[str, Any]]:
 class AnthropicProvider:
     """Maps canonical types ↔ Anthropic SDK at the boundary only."""
 
-    def __init__(self, *, model: str | None = None, api_key: str | None = None):
+    def __init__(
+        self,
+        *,
+        model: str | None = None,
+        api_key: str | None = None,
+        prompt_cache: bool | None = None,
+    ):
         self.model = model or os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
+        # Prompt caching is on by default (cheap, big win for multi-turn/k-shot
+        # runs); disable with ANTHROPIC_PROMPT_CACHE=0 or prompt_cache=False.
+        if prompt_cache is None:
+            prompt_cache = os.environ.get("ANTHROPIC_PROMPT_CACHE", "1") not in ("0", "false", "False")
+        self.prompt_cache = prompt_cache
 
     def complete(
         self,
@@ -89,12 +108,32 @@ class AnthropicProvider:
         import anthropic
 
         client = anthropic.Anthropic(api_key=self.api_key)
+
+        anthropic_tools = _to_anthropic_tools(tools)
+        messages = _serialize_messages(history)
+        system_param: Any = system
+
+        if self.prompt_cache:
+            # Two breakpoints (<=4 allowed):
+            #  1) end of the static prefix (tools -> system): one cache_control on
+            #     the last system block caches BOTH tools and system, reused on
+            #     every turn and across runs within the TTL.
+            #  2) end of the growing conversation: marking the last message block
+            #     caches the prior turns so each turn only pays full price for the
+            #     newest content (cache reads are 10% of input price).
+            if system:
+                system_param = [_mark_cache({"type": "text", "text": system})]
+            if messages:
+                content = messages[-1].get("content")
+                if isinstance(content, list) and content and isinstance(content[-1], dict):
+                    content[-1] = _mark_cache(content[-1])
+
         response = client.messages.create(
             model=self.model,
             max_tokens=4096,
-            system=system,
-            tools=_to_anthropic_tools(tools),
-            messages=_serialize_messages(history),
+            system=system_param,
+            tools=anthropic_tools,
+            messages=messages,
         )
 
         text_parts: list[str] = []
@@ -110,6 +149,8 @@ class AnthropicProvider:
         usage = Usage(
             input_tokens=getattr(response.usage, "input_tokens", 0),
             output_tokens=getattr(response.usage, "output_tokens", 0),
+            cache_read_input_tokens=getattr(response.usage, "cache_read_input_tokens", 0) or 0,
+            cache_creation_input_tokens=getattr(response.usage, "cache_creation_input_tokens", 0) or 0,
         )
         stop = _map_stop_reason(response.stop_reason or "end_turn")
         if tool_calls and stop == StopReason.DONE:

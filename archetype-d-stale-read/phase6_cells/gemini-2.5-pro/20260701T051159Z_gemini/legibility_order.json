@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gemini-2.5-pro\\20260701T051159Z_gemini",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 6 precedes named diagnosis at event 7",
+  "diagnosis_ordinal": 7,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 6,
+  "first_probe_cmd": "\n# Script to reproduce the bug\nACCOUNT_ID=\"acct-repro-$$\"\n\n# Initialize account in the primary DB.\npsql $PRIMARY_URL -c \"INSERT INTO accounts (id, balance_cents) VALUES ('${ACCOUNT_ID}', 0) ON CONFLICT (id) DO UPDATE SET balance_cents = 0;\" > /dev/null\n\necho \"Starting reproduction loop...\"\n\nfor i in {1..50}; do\n  # Deposit 100 cents. The new balance should be 100.\n  DEPOSIT_RESPONSE=$(curl -s -X POST \"${API_URL}/deposit\" \\\n    -H \"Content-Type: application/json\" \\\n    -d \"{\\\"account\\\": \\\"${ACCOUNT_ID}\\\", \\\"amount_cents\\\": 100}\")\n  \n  LATEST_BALANCE=$(echo \"${DEPOSIT_RESPONSE}\" | python3 -c 'import sys, json; print(json.load(sys.stdin)[\"balance_cents\"])' 2>/dev/null)\n\n  # Check if deposit was successful and balance is 100\n  if [ \"${LATEST_BALANCE}\" != \"100\" ]; then\n    echo \"Warning: Deposit did not result in expected balance of 100. Got '${LATEST_BALANCE}'. Resetting.\"\n    psql $PRIMARY_URL -c \"UPDATE accounts SET balance_cents = 0 WHERE id = '${ACCOUNT_ID}';\" > /dev/null\n    continue\n  fi\n\n  # Immediately get the balance\n  BALANCE_RESPONSE=$(curl -s \"${API_URL}/balance?account=${ACCOUNT_ID}\")\n  \n  CURRENT_BALANCE=$(echo \"${BALANCE_RESPONSE}\" | python3 -c 'import sys, json; print(json.load(sys.stdin)[\"balance_cents\"])' 2>/dev/null)\n  SOURCE=$(echo \"${BALANCE_RESPONSE}\" | python3 -c 'import sys, json; print(json.load(sys.stdin)[\"source\"])' 2>/dev/null)\n\n  echo -n \".\"\n\n  if [ \"${CURRENT_BALANCE}\" -ne \"${LATEST_BALANCE}\" ]; then\n    echo \"\"\n    echo \"BUG! Inconsistency detected on iteration ${i}.\"\n    echo \"  - POST response balance: ${LATEST_BALANCE}\"\n    echo \"  - GET response balance:  ${CURRENT_BALANCE} (from ${SOURCE})\"\n    # Exit with success to show output, not error\n    exit 0\n  fi\n\n  # Reset balance for the next iteration.\n  psql $PRIMARY_URL -c \"UPDATE accounts SET balance_cents = 0 WHERE id = '${ACCOUNT_ID}';\" > /dev/null\n\ndone\n\necho \"\"\necho \"No inconsistency detected after 50 iterations.\"\n\n# Cleanup\npsql $PRIMARY_URL -c \"DELETE FROM accounts WHERE id = '${ACCOUNT_ID}';\" > /dev/null\n",
+  "probe_attempts": 4,
+  "probe_successes": 4,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag_opus_k5\\20260627T040024Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (2 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 1902,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 8,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "set -e\n# do a deposit then repeatedly poll balance\nacct=acct-1\necho \"initial:\"\ncurl -s \"$API_URL/balance?account=$acct\"\necho\necho \"deposit:\"\ncurl -s -X POST \"$A",
+  "first_edit_ordinal": 13,
+  "observation_precedes_fix": true
+}

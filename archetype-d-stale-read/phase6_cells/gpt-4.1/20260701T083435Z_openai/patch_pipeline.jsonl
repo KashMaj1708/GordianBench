@@ -1,0 +1,25 @@
+{"ts": 1782894782.525, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 1, "input_tokens": 654, "output_tokens": 17, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782894783.986, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 2, "input_tokens": 1944, "output_tokens": 25, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782894786.814, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 3, "input_tokens": 2010, "output_tokens": 26, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782894791.412, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 4, "input_tokens": 2115, "output_tokens": 28, "cache_read_input_tokens": 1920, "cache_creation_input_tokens": 0}
+{"ts": 1782894793.974, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 5, "input_tokens": 2175, "output_tokens": 30, "cache_read_input_tokens": 2048, "cache_creation_input_tokens": 0}
+{"ts": 1782894796.863, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 6, "input_tokens": 2237, "output_tokens": 49, "cache_read_input_tokens": 2176, "cache_creation_input_tokens": 0}
+{"ts": 1782894799.603, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 7, "input_tokens": 2435, "output_tokens": 27, "cache_read_input_tokens": 2176, "cache_creation_input_tokens": 0}
+{"ts": 1782894801.344, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 8, "input_tokens": 2611, "output_tokens": 29, "cache_read_input_tokens": 2432, "cache_creation_input_tokens": 0}
+{"ts": 1782894804.718, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 9, "input_tokens": 2827, "output_tokens": 29, "cache_read_input_tokens": 2560, "cache_creation_input_tokens": 0}
+{"ts": 1782894806.774, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 10, "input_tokens": 3044, "output_tokens": 29, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
+{"ts": 1782894809.023, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 11, "input_tokens": 3261, "output_tokens": 29, "cache_read_input_tokens": 2944, "cache_creation_input_tokens": 0}
+{"ts": 1782894811.075, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 12, "input_tokens": 3478, "output_tokens": 29, "cache_read_input_tokens": 3200, "cache_creation_input_tokens": 0}
+{"ts": 1782894812.568, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 13, "input_tokens": 3695, "output_tokens": 29, "cache_read_input_tokens": 3456, "cache_creation_input_tokens": 0}
+{"ts": 1782894814.587, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 14, "input_tokens": 3912, "output_tokens": 51, "cache_read_input_tokens": 3712, "cache_creation_input_tokens": 0}
+{"ts": 1782894816.859, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 15, "input_tokens": 4152, "output_tokens": 29, "cache_read_input_tokens": 3840, "cache_creation_input_tokens": 0}
+{"ts": 1782894819.267, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 16, "input_tokens": 4370, "output_tokens": 28, "cache_read_input_tokens": 4096, "cache_creation_input_tokens": 0}
+{"ts": 1782894821.32, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 17, "input_tokens": 4430, "output_tokens": 30, "cache_read_input_tokens": 4352, "cache_creation_input_tokens": 0}
+{"ts": 1782894828.389, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 18, "input_tokens": 4492, "output_tokens": 53, "cache_read_input_tokens": 4352, "cache_creation_input_tokens": 0}
+{"ts": 1782894837.357, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 19, "input_tokens": 4681, "output_tokens": 17, "cache_read_input_tokens": 4480, "cache_creation_input_tokens": 0}
+{"ts": 1782894860.305, "stage": "turn_usage", "run": "openai/gpt-4.1", "turn": 20, "input_tokens": 5971, "output_tokens": 1620, "cache_read_input_tokens": 4608, "cache_creation_input_tokens": 0}
+{"ts": 1782894862.186, "stage": "content_check", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 663, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 2, "last_120_chars": "SELECT 1\")\n+\n \t// Client just wrote this account; serve its reads from the primary briefly.\n \ts.pin.mark(req.Account)\n \n", "ok": true}
+{"ts": 1782894868.379, "stage": "git_apply", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782894868.379, "stage": "extraction", "run": "openai/gpt-4.1", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782894868.379, "stage": "auto_submit", "run": "openai/gpt-4.1", "source": "workspace_git_diff", "byte_len": 663, "ok": true}
+{"ts": 1782894868.379, "stage": "usage", "run": "openai/gpt-4.1", "input_tokens": 64494, "output_tokens": 2204, "cache_read_input_tokens": 54272, "cache_creation_input_tokens": 0}

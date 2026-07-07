@@ -1,0 +1,42 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..c5215f9 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -18,7 +18,7 @@ import (
+ // so the client reads its own write. Reads outside the window use the replica to
+ // offload the primary.
+ type readWritePin struct {
+-	mu  sync.Mutex
++	mu  sync.RWMutex // Use RWMutex for better read performance.
+ 	ttl time.Duration
+ 	exp map[string]time.Time
+ }
+@@ -28,14 +28,13 @@ func newReadWritePin(ttl time.Duration) *readWritePin {
+ }
+ 
+ func (p *readWritePin) mark(account string) {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
++	// Assumes caller holds the write lock.
+ 	p.exp[account] = time.Now().Add(p.ttl)
+ }
+ 
+ func (p *readWritePin) pinned(account string) bool {
+-	p.mu.Lock()
+-	defer p.mu.Unlock()
++	p.mu.RLock()
++	defer p.mu.RUnlock()
+ 	exp, ok := p.exp[account]
+ 	return ok && time.Now().Before(exp)
+ }
+@@ -66,6 +65,10 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Acquire exclusive lock before the DB write and hold it until after the pin is marked.
++	s.pin.mu.Lock()
++	defer s.pin.mu.Unlock()
++
+ 	var balance int64
+ 	err := s.primary.QueryRow(
+ 		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",

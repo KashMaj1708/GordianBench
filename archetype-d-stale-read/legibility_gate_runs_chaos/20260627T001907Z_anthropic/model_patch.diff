@@ -1,0 +1,25 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..df3c110 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -66,6 +66,10 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Mark account for primary-read pinning BEFORE writing, to ensure any concurrent
++	// reads see the primary (not the stale replica) after the write completes.
++	s.pin.mark(req.Account)
++
+ 	var balance int64
+ 	err := s.primary.QueryRow(
+ 		"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents",
+@@ -76,9 +80,6 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
+-
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+ 		"balance_cents": balance,

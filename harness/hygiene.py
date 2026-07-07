@@ -91,10 +91,7 @@ def verify_patch_images(session: "PatchStackSession") -> list[str]:
 
     if not isinstance(session, PatchStackSession):
         raise TypeError("expected PatchStackSession")
-    expected = {
-        "gateway": session.workspace.gateway_image,
-        "upstream-mock": session.workspace.upstream_image,
-    }
+    expected = session.workspace.service_images
     running = _get_running_fingerprints(session)
     errors: list[str] = []
     for svc, tag in expected.items():
@@ -115,13 +112,19 @@ def verify_patch_images(session: "PatchStackSession") -> list[str]:
 
 def _get_running_fingerprints(session) -> dict[str, ImageFingerprint]:
     """Return image IDs for running compose services."""
-    from harness.lifecycle import ARCHETYPE_ROOT
+    spec = session.spec
+    if hasattr(session, "workspace") and hasattr(session.workspace, "service_images"):
+        services = tuple(session.workspace.service_images.keys())
+    elif hasattr(session, "variant"):
+        services = tuple(session.spec.variant_image_tags.get(session.variant, {}).keys())
+    else:
+        services = ("gateway", "upstream-mock")
 
     out: dict[str, ImageFingerprint] = {}
-    for service in ("gateway", "upstream-mock"):
+    for service in services:
         proc = subprocess.run(
             session.compose_cmd("ps", service, "--format", "json"),
-            cwd=ARCHETYPE_ROOT,
+            cwd=spec.root,
             capture_output=True,
             text=True,
             check=False,
@@ -154,7 +157,7 @@ def verify_variant_images(session: StackSession) -> list[str]:
 
     Tag labels alone are insufficient; this compares docker image inspect IDs.
     """
-    expected = VARIANT_IMAGE_TAGS.get(session.variant, {})
+    expected = session.spec.variant_image_tags.get(session.variant, {})
     running = get_running_image_fingerprints(session)
     errors: list[str] = []
     for svc, tag in expected.items():

@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\opus-4.8\\20260630T231549Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "correct LSN fix; disambiguating observation (primary_vs_replica) at event 8 precedes first edit at event 15",
+  "fix_mechanism": "TRUE_FIX",
+  "fix_evidence": "value/version catch-up: replica read compared to remembered write before trusting",
+  "correctness_basis": "value-catchup (unconfirmed)",
+  "delivered_bytes": 6075,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 8,
+  "first_observation_kind": "primary_vs_replica",
+  "first_observation_cmd": "curl -s \"$API_URL/health\"; echo\n# Check replica connection - is the replica actually a separate host through toxiproxy?\npsql \"$PRIMARY_URL\" -c \"SELECT id, balan",
+  "first_edit_ordinal": 15,
+  "observation_precedes_fix": true
+}

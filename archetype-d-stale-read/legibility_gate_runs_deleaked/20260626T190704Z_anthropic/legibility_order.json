@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_deleaked\\20260626T190704Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 12 precedes named diagnosis at event 25",
+  "diagnosis_ordinal": 25,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 12,
+  "first_probe_cmd": "\n# First, check that the API is healthy\ncurl -s -X GET http://ledger-api:8080/health\necho \"---\"\n\n# Let's make sure the account exists in the database\npsql postgresql://bench:bench@postgres-primary:5432/ledger -c \"SELECT id, balance_cents FROM accounts WHERE id = 'test-acct-1' LIMIT 1;\"\n",
+  "probe_attempts": 6,
+  "probe_successes": 6,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

@@ -1,0 +1,10 @@
+{
+  "gate": "archetype-d-stale-read-legibility",
+  "provider": "gemini",
+  "model": "gemini-2.5-pro",
+  "turns_used": 3,
+  "patch_bytes": 1284,
+  "patch_source": "workspace_git_diff",
+  "patch_death_stage": null,
+  "chaos": true
+}

@@ -1,0 +1,31 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..877f45e 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -16,7 +16,7 @@ import (
+ // readWritePin implements read-after-write consistency: for a short window after
+ // a client writes an account, that account's reads are served from the primary
+ // so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
++// offload the primary only after verifying replication has caught up.
+ type readWritePin struct {
+ 	mu  sync.Mutex
+ 	ttl time.Duration
+@@ -101,6 +101,17 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 
+ 	balance, err := readBalance(db, account)
++	
++	// If reading from replica, verify the replica is up-to-date by comparing with primary
++	if err == nil && source == "replica" {
++		primaryBalance, primaryErr := readBalance(s.primary, account)
++		if primaryErr == nil && primaryBalance != balance {
++			// Replica is stale; use primary instead
++			source = "primary"
++			balance = primaryBalance
++		}
++	}
++	
+ 	if err != nil && source == "primary" {
+ 		// Primary read path unavailable; fall back to the replica.
+ 		source = "replica"

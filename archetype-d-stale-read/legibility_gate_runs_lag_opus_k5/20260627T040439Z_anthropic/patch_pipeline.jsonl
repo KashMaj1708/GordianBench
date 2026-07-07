@@ -1,0 +1,6 @@
+{"ts": 1782533071.887, "stage": "submit_attempt", "run": "anthropic/claude-opus-4-8", "turn": 12, "tool_call_id": "toolu_01A8LxTAk4w8MKWw72CpSv6r", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782533073.778, "stage": "content_check", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5928, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 6, "last_120_chars": ".Printf(\"ledger-api listening on %s (lsn-based read-after-write)\", addr)\n \tlog.Fatal(http.ListenAndServe(addr, mux))\n }\n", "ok": true}
+{"ts": 1782533074.826, "stage": "git_apply", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782533074.826, "stage": "extraction", "run": "anthropic/claude-opus-4-8", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782533074.826, "stage": "accepted", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 5928}
+{"ts": 1782533074.826, "stage": "usage", "run": "anthropic/claude-opus-4-8", "input_tokens": 24, "output_tokens": 5530, "cache_read_input_tokens": 73337, "cache_creation_input_tokens": 8862}

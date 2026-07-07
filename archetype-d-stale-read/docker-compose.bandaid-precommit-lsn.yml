@@ -1,0 +1,10 @@
+# Band-aid: the correct LSN fix with ONLY the pre-commit-LSN-capture error (P3)
+# injected — pg_current_wal_lsn() captured inside the writing UPDATE instead of in
+# a separate post-commit SELECT. The recorded watermark is a pre-commit position
+# the replica has already replayed, so the freshness gate is a no-op. Must FAIL
+# Tier 2: this is exactly how all four Opus LSN patches served stale (Reports 6-7).
+services:
+  ledger-api:
+    image: archetype-d-stale-read-ledger-api:bandaid-precommit-lsn
+    build:
+      context: ./patches/bandaid-precommit-lsn/ledger-api

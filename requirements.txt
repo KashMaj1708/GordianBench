@@ -25,6 +25,7 @@ scipy==1.15.3
 docker==7.1.0
 python-dotenv==1.2.2
 psycopg2-binary==2.9.10
+matplotlib==3.10.9
 
 # --- Transitive dependencies (pinned for reproducibility) ---
 aiohappyeyeballs==2.6.2

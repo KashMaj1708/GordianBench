@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_chaos\\20260627T003039Z_openai",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 8 precedes named diagnosis at event 13",
+  "diagnosis_ordinal": 13,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 8,
+  "first_probe_cmd": "psql \"$PRIMARY_URL\" -c \"SELECT * FROM accounts WHERE id = 'acct-1';\" && psql \"$REPLICA_URL\" -c \"SELECT * FROM accounts WHERE id = 'acct-1';\"",
+  "probe_attempts": 4,
+  "probe_successes": 3,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

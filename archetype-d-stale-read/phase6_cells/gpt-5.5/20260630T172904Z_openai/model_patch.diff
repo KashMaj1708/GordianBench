@@ -1,0 +1,221 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..44beaa0 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -7,37 +7,80 @@ import (
+ 	"net/http"
+ 	"os"
+ 	"strconv"
++	"strings"
+ 	"sync"
+-	"time"
+ 
+ 	_ "github.com/lib/pq"
+ )
+ 
+-// readWritePin implements read-after-write consistency: for a short window after
+-// a client writes an account, that account's reads are served from the primary
+-// so the client reads its own write. Reads outside the window use the replica to
+-// offload the primary.
++// readWritePin tracks WAL positions for accounts written by this process.
++//
++// The API must not return an older value after a successful deposit. A fixed
++// time-based pin is only a guess: replica lag can be longer than the TTL (or the
++// next request can land on another process with an empty in-memory pin). Instead
++// reads use WAL positions. A replica read is allowed only once the replica has
++// replayed a WAL LSN known to be at or after the relevant committed write;
++// otherwise the read is served from the primary.
+ type readWritePin struct {
+ 	mu  sync.Mutex
+-	ttl time.Duration
+-	exp map[string]time.Time
++	exp map[string]pinEntry
+ }
+ 
+-func newReadWritePin(ttl time.Duration) *readWritePin {
+-	return &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}
++type pinEntry struct {
++	lsn string
++	pos uint64
+ }
+ 
+-func (p *readWritePin) mark(account string) {
++func newReadWritePin() *readWritePin {
++	return &readWritePin{exp: make(map[string]pinEntry)}
++}
++
++func (p *readWritePin) mark(account, lsn string) {
++	pos, ok := parseLSN(lsn)
++	if !ok {
++		// If we cannot determine the LSN after a successful write, be safe and
++		// keep reads for this account on the primary.
++		pos = ^uint64(0)
++		lsn = ""
++	}
++
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	p.exp[account] = time.Now().Add(p.ttl)
++	if cur, exists := p.exp[account]; exists && cur.pos > pos {
++		return
++	}
++	p.exp[account] = pinEntry{lsn: lsn, pos: pos}
+ }
+ 
+-func (p *readWritePin) pinned(account string) bool {
++func (p *readWritePin) required(account string) (pinEntry, bool) {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+-	exp, ok := p.exp[account]
+-	return ok && time.Now().Before(exp)
++	entry, ok := p.exp[account]
++	return entry, ok
++}
++
++func (p *readWritePin) clear(account string, pos uint64) {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	if cur, ok := p.exp[account]; ok && cur.pos == pos {
++		delete(p.exp, account)
++	}
++}
++
++func parseLSN(lsn string) (uint64, bool) {
++	parts := strings.Split(lsn, "/")
++	if len(parts) != 2 {
++		return 0, false
++	}
++	hi, err := strconv.ParseUint(parts[0], 16, 32)
++	if err != nil {
++		return 0, false
++	}
++	lo, err := strconv.ParseUint(parts[1], 16, 32)
++	if err != nil {
++		return 0, false
++	}
++	return (hi << 32) | lo, true
+ }
+ 
+ type server struct {
+@@ -76,8 +119,14 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	// Client just wrote this account; serve its reads from the primary briefly.
+-	s.pin.mark(req.Account)
++	// The UPDATE above has committed before QueryRow returns. Capture the
++	// primary's current WAL location after that commit; the replica is safe for
++	// this account only after it has replayed at least this LSN.
++	var lsn string
++	if err := s.primary.QueryRow("SELECT pg_current_wal_lsn()::text").Scan(&lsn); err != nil {
++		log.Printf("could not read WAL LSN after deposit for account %q: %v", req.Account, err)
++	}
++	s.pin.mark(req.Account, lsn)
+ 
+ 	writeJSON(w, map[string]any{
+ 		"account":       req.Account,
+@@ -93,18 +142,20 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
+-	source := "replica"
+-	db := s.replica
+-	if s.pin.pinned(account) {
+-		source = "primary"
+-		db = s.primary
++	source := "primary"
++	db := s.primary
++	if s.replicaSafeForAccount(account) {
++		source = "replica"
++		db = s.replica
+ 	}
+ 
+ 	balance, err := readBalance(db, account)
+-	if err != nil && source == "primary" {
+-		// Primary read path unavailable; fall back to the replica.
+-		source = "replica"
+-		balance, err = readBalance(s.replica, account)
++	if err != nil && source == "replica" {
++		// Falling back from replica to primary is safe: it may be fresher, but not
++		// older. Never fall back from a required primary read to the replica,
++		// because that can violate read-after-write consistency.
++		source = "primary"
++		balance, err = readBalance(s.primary, account)
+ 	}
+ 	if err != nil {
+ 		http.Error(w, "read failed: "+err.Error(), http.StatusInternalServerError)
+@@ -118,6 +169,47 @@ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	})
+ }
+ 
++func (s *server) replicaSafeForAccount(account string) bool {
++	entry, pinned := s.pin.required(account)
++	if !pinned {
++		// This process might not have seen the preceding write (for example when
++		// there are multiple API instances), so do not assume an unpinned account is
++		// safe to read from a possibly lagging replica. Use the primary's current
++		// WAL location as a freshness barrier for the replica.
++		var lsn string
++		if err := s.primary.QueryRow("SELECT pg_current_wal_lsn()::text").Scan(&lsn); err != nil {
++			log.Printf("could not read primary WAL LSN before balance read for account %q: %v", account, err)
++			return false
++		}
++		pos, ok := parseLSN(lsn)
++		if !ok {
++			return false
++		}
++		entry = pinEntry{lsn: lsn, pos: pos}
++	}
++	if entry.lsn == "" {
++		return false
++	}
++
++	var caughtUp bool
++	err := s.replica.QueryRow(`
++		SELECT CASE
++			WHEN pg_is_in_recovery() THEN COALESCE(pg_last_wal_replay_lsn() >= $1::pg_lsn, false)
++			ELSE true
++		END`, entry.lsn).Scan(&caughtUp)
++	if err != nil || !caughtUp {
++		if err != nil {
++			log.Printf("could not check replica replay LSN for account %q: %v", account, err)
++		}
++		return false
++	}
++
++	if pinned {
++		s.pin.clear(account, entry.pos)
++	}
++	return true
++}
++
+ func readBalance(db *sql.DB, account string) (int64, error) {
+ 	var balance int64
+ 	err := db.QueryRow("SELECT balance_cents FROM accounts WHERE id = $1", account).Scan(&balance)
+@@ -158,17 +250,10 @@ func main() {
+ 		log.Fatal("PRIMARY_URL and REPLICA_URL required")
+ 	}
+ 
+-	ttlMS := 250
+-	if v := os.Getenv("PIN_TTL_MS"); v != "" {
+-		if parsed, err := strconv.Atoi(v); err == nil {
+-			ttlMS = parsed
+-		}
+-	}
+-
+ 	s := &server{
+ 		primary: mustOpen(primaryDSN),
+ 		replica: mustOpen(replicaDSN),
+-		pin:     newReadWritePin(time.Duration(ttlMS) * time.Millisecond),
++		pin:     newReadWritePin(),
+ 	}
+ 	defer s.primary.Close()
+ 	defer s.replica.Close()
+@@ -182,6 +267,6 @@ func main() {
+ 	if p := os.Getenv("PORT"); p != "" {
+ 		addr = ":" + p
+ 	}
+-	log.Printf("ledger-api listening on %s (pin ttl %dms)", addr, ttlMS)
++	log.Printf("ledger-api listening on %s", addr)
+ 	log.Fatal(http.ListenAndServe(addr, mux))
+ }

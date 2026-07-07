@@ -1,0 +1,4 @@
+{"ts": 1782501985.506, "stage": "content_check", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 634, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 1, "last_120_chars": "ounts.balance_cents + $1\n+\t\t RETURNING balance_cents`,\n \t\treq.Amount, req.Account,\n \t).Scan(&balance)\n \tif err != nil {\n", "ok": true}
+{"ts": 1782501986.363, "stage": "git_apply", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782501986.363, "stage": "extraction", "run": "gemini/gemini-2.5-pro", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782501986.363, "stage": "auto_submit", "run": "gemini/gemini-2.5-pro", "source": "workspace_git_diff", "byte_len": 634, "ok": true}

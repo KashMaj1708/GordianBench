@@ -1,0 +1,42 @@
+diff --git a/src/ledger-api/main.go b/src/ledger-api/main.go
+index 15fc8a8..f4507ec 100644
+--- a/src/ledger-api/main.go
++++ b/src/ledger-api/main.go
+@@ -76,6 +76,13 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 		return
+ 	}
+ 
++	// Wait for the replica to catch up with the write before returning.
++	// This ensures that when the pin TTL expires, the replica will have the updated value.
++	if err := s.waitForReplication(req.Account, balance); err != nil {
++		http.Error(w, "replication timeout: "+err.Error(), http.StatusInternalServerError)
++		return
++	}
++
+ 	// Client just wrote this account; serve its reads from the primary briefly.
+ 	s.pin.mark(req.Account)
+ 
+@@ -86,6 +93,23 @@ func (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {
+ 	})
+ }
+ 
++// waitForReplication polls the replica until it sees the expected balance for the account,
++// or until a timeout is reached.
++func (s *server) waitForReplication(account string, expectedBalance int64) error {
++	deadline := time.Now().Add(5 * time.Second)
++	for {
++		var replicaBalance int64
++		err := s.replica.QueryRow("SELECT balance_cents FROM accounts WHERE id = $1", account).Scan(&replicaBalance)
++		if err == nil && replicaBalance == expectedBalance {
++			return nil
++		}
++		if time.Now().After(deadline) {
++			return sql.ErrNoRows
++		}
++		time.Sleep(10 * time.Millisecond)
++	}
++}
++
+ func (s *server) handleBalance(w http.ResponseWriter, r *http.Request) {
+ 	account := r.URL.Query().Get("account")
+ 	if account == "" {

@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_lag\\20260627T015038Z_gemini",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (BANDAID: ttl_bump); investigated (2 disambiguating probe(s))",
+  "fix_mechanism": "BANDAID",
+  "fix_evidence": "ttl_bump",
+  "correctness_basis": null,
+  "delivered_bytes": 388,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 21,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "python3 -c '\nimport os\nimport requests\nimport time\n\nAPI_URL = os.environ[\"API_URL\"]\nACCOUNT = \"acct-test\"\n\ndef get_balance():\n    resp = requests.get(f\"{API_URL",
+  "first_edit_ordinal": 32,
+  "observation_precedes_fix": true
+}

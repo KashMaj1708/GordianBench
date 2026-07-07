@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234529Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (2 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 1474,
+  "investigated": true,
+  "disambiguating_probes": 2,
+  "first_observation_ordinal": 33,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# Deposit\necho \"=== Deposit 1000 ===\"\ncurl -s -X POST http://ledger-api:8080/deposit \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"account\": \"test-acct-1\", ",
+  "first_edit_ordinal": 54,
+  "observation_precedes_fix": true
+}

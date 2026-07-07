@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_chaos\\20260627T001648Z_anthropic",
+  "verdict": "INVESTIGATION_DRIVEN",
+  "test2": "PASS",
+  "reason": "first successful runtime probe at event 14 precedes named diagnosis at event 37",
+  "diagnosis_ordinal": 37,
+  "diagnosis_class": "stale-read",
+  "diagnosis_term": "replication lag",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 14,
+  "first_probe_cmd": "\n# Check if we need to set up the database\npsql $PRIMARY_URL -c \"SELECT COUNT(*) as accounts FROM accounts\" 2>&1 | head -20\n",
+  "probe_attempts": 5,
+  "probe_successes": 4,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

@@ -1,0 +1,494 @@
+[
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "After a successful POST /deposit to acct-1, a follow-up GET /balance?account=acct-1 sometimes returns the pre-deposit value. Investigate ledger-api/main.go and the running system, then fix ledger-api/main.go with write_file and call submit_patch."
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_jG8TRSB5MetDblARzeeANdAc",
+        "name": "read_file",
+        "input": {}
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_jG8TRSB5MetDblARzeeANdAc",
+        "is_error": false,
+        "output_preview": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"log\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"sync\"\n\t\"time\"\n\n\t_ \"github.com/lib/pq\"\n)\n\n// readWritePin implements read-after-write consistency: for a short window after\n// a client writes an account, that account's reads are served from the primary\n// so the client reads its own write. Reads outside the window use the replica to\n// offload the primary.\ntype readWritePin struct {\n\tmu  sync.Mutex\n\tttl time.Duration\n\texp map[string]time.Time\n}\n\nfunc newReadWritePin(ttl time.Duration) *readWritePin {\n\treturn &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}\n}\n\nfunc (p *readWritePin) mark(account string) {\n\tp.mu.Lock()\n\tdefer p.mu.Unlock()\n\tp.exp[account] = time.Now().Add(p.ttl)\n}\n\nfunc (p *readWritePin) pinned(account string) bool {\n\tp.mu.Lock()\n\tdefer p.mu.Unlock()\n\texp, ok := p.exp[account]\n\treturn ok && time.Now().Before(exp)\n}\n\ntype server struct {\n\tprimary *sql.DB\n\treplica *sql.DB\n\tpin     *readWritePin\n}\n\ntype depositRequest struct {\n\tAccount string `json:\"account\"`\n\tAmount  int64  `json:\"amount_cents\"`\n}\n\nfunc (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {\n\tif r.Method != http.MethodPost {\n\t\thttp.Error(w, \"method not allowed\", http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n\tvar req depositRequest\n\tif err := json.NewDecoder(r.Body).Decode(&req); err != nil {\n\t\thttp.Error(w, \"bad json\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif req.Account == \"\" || req.Amount == 0 {\n\t\thttp.Error(w, \"invalid request\", http.StatusBadRequest)\n\t\treturn\n\t}\n\n\tvar balance int64\n\terr := s.primary.QueryRow(\n\t\t\"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents\",\n\t\treq.Amount, req.Account,\n\t).Scan(&balance)\n\tif err != nil {\n\t\thttp.Error(w, \"write failed: \"+err.Error(), http.StatusInternalServerError)\n\t\treturn\n\t}\n\n\t// Client just wrote this account; serve its reads from the primary briefly.\n\ts.pin.mark(req.Account)\n\n\twriteJSON(w, map[string]any{\n\t\t\"account\":       req.Account,\n\t\t\"balan"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_27kd1NO0ZxsGOLvTsX3skVBP",
+        "name": "run_bash",
+        "input": {
+          "command": "echo $PRIMARY_URL && echo $REPLICA_URL"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_27kd1NO0ZxsGOLvTsX3skVBP",
+        "is_error": false,
+        "output_preview": "postgresql://bench:bench@postgres-primary:5432/ledger\npostgresql://bench:bench@postgres-replica:5432/ledger\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_fQ8k6TEGTaw3okbFJxNq7Bky",
+        "name": "run_bash",
+        "input": {
+          "command": "psql \"$PRIMARY_URL\" -c '\\d accounts'"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_fQ8k6TEGTaw3okbFJxNq7Bky",
+        "is_error": false,
+        "output_preview": "                 Table \"public.accounts\"\n    Column     |  Type  | Collation | Nullable | Default \n---------------+--------+-----------+----------+---------\n id            | text   |           | not null | \n balance_cents | bigint |           | not null | \nIndexes:\n    \"accounts_pkey\" PRIMARY KEY, btree (id)\n\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_n1T15dPRmZSp8Sq5urfJy094",
+        "name": "run_bash",
+        "input": {
+          "command": "psql \"$PRIMARY_URL\" -c 'SELECT * FROM accounts'"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_n1T15dPRmZSp8Sq5urfJy094",
+        "is_error": false,
+        "output_preview": "   id   | balance_cents \n--------+---------------\n acct-1 |             0\n(1 row)\n\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_QCM8rlak7mWQuzJBbDEPiQ6a",
+        "name": "run_bash",
+        "input": {
+          "command": "psql \"$REPLICA_URL\" -c 'SELECT * FROM accounts'"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_QCM8rlak7mWQuzJBbDEPiQ6a",
+        "is_error": false,
+        "output_preview": "   id   | balance_cents \n--------+---------------\n acct-1 |             0\n(1 row)\n\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_iBUPkFpZM96I1DQxoa4Cqnum",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -X POST -H 'Content-Type: application/json' --data '{\"account\":\"acct-1\", \"amount_cents\":100}' $API_URL/deposit"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_iBUPkFpZM96I1DQxoa4Cqnum",
+        "is_error": false,
+        "output_preview": "{\"account\":\"acct-1\",\"balance_cents\":100,\"source\":\"primary\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100   100  100    60  100    40  10814   7209 --:--:-- --:--:-- --:--:-- 20000\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_qMg9epGsiKEduSWcJSjlOMrB",
+        "name": "run_bash",
+        "input": {
+          "command": "curl \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_qMg9epGsiKEduSWcJSjlOMrB",
+        "is_error": false,
+        "output_preview": "{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0  13529      0 --:--:-- --:--:-- --:--:-- 19333\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_7R2djhdOAiL7OTVBtlllR378",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_7R2djhdOAiL7OTVBtlllR378",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:22 GMT\nContent-Length: 58\n\n{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0    488      0 --:--:-- --:--:-- --:--:-- 19333\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_0MMMphkQFbIpQrcf31fWS30R",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_0MMMphkQFbIpQrcf31fWS30R",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:25 GMT\nContent-Length: 58\n\n{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0  24056      0 --:--:-- --:--:-- --:--:-- 29000\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_TsDuDcNSJmHO9L6kit7rLTai",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_TsDuDcNSJmHO9L6kit7rLTai",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:27 GMT\nContent-Length: 58\n\n{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0  18886      0 --:--:-- --:--:-- --:--:-- 29000\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_cRfVtemLYTfvJoCe2YgjE7gk",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_cRfVtemLYTfvJoCe2YgjE7gk",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:29 GMT\nContent-Length: 58\n\n{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0  18477      0 --:--:-- --:--:-- --:--:-- 29000\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_KisbMhbTGPkwW1z0uVriMyKH",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_KisbMhbTGPkwW1z0uVriMyKH",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:31 GMT\nContent-Length: 58\n\n{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0  23135      0 --:--:-- --:--:-- --:--:-- 29000\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_JHwQCDgY83S1YXHOywwJganQ",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_JHwQCDgY83S1YXHOywwJganQ",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:33 GMT\nContent-Length: 58\n\n{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0  17469      0 --:--:-- --:--:-- --:--:-- 19333\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_kwv87gWvavVu2NagCocXHpCS",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i -X POST -H 'Content-Type: application/json' --data '{\"account\":\"acct-1\", \"amount_cents\":200}' $API_URL/deposit"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_kwv87gWvavVu2NagCocXHpCS",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:35 GMT\nContent-Length: 60\n\n{\"account\":\"acct-1\",\"balance_cents\":300,\"source\":\"primary\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100   100  100    60  100    40   3735   2490 --:--:-- --:--:-- --:--:--  6666\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_rDoA4Ok4AzuhHKdKJ59DHfr3",
+        "name": "run_bash",
+        "input": {
+          "command": "curl -i \"$API_URL/balance?account=acct-1\""
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_rDoA4Ok4AzuhHKdKJ59DHfr3",
+        "is_error": false,
+        "output_preview": "HTTP/1.1 200 OK\nContent-Type: application/json\nDate: Wed, 01 Jul 2026 08:33:37 GMT\nContent-Length: 58\n\n{\"account\":\"acct-1\",\"balance_cents\":0,\"source\":\"replica\"}\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100    58  100    58    0     0   2360      0 --:--:-- --:--:-- --:--:--  2416\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_bvHvkmOwYwLZVSWtaM7rVLCj",
+        "name": "run_bash",
+        "input": {
+          "command": "psql \"$PRIMARY_URL\" -c 'SELECT * FROM accounts'"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_bvHvkmOwYwLZVSWtaM7rVLCj",
+        "is_error": false,
+        "output_preview": "   id   | balance_cents \n--------+---------------\n acct-1 |           300\n(1 row)\n\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_cagj9sMRkHAGPa1MyDfuznmK",
+        "name": "run_bash",
+        "input": {
+          "command": "psql \"$REPLICA_URL\" -c 'SELECT * FROM accounts'"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_cagj9sMRkHAGPa1MyDfuznmK",
+        "is_error": false,
+        "output_preview": "   id   | balance_cents \n--------+---------------\n acct-1 |           100\n(1 row)\n\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_asvgHN3eNXEkhk3e5ySYnilA",
+        "name": "run_bash",
+        "input": {
+          "command": "psql \"$REPLICA_URL\" -c 'SELECT pg_is_in_recovery(), now(), pg_last_xact_replay_timestamp(), now()-pg_last_xact_replay_timestamp()'"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_asvgHN3eNXEkhk3e5ySYnilA",
+        "is_error": false,
+        "output_preview": " pg_is_in_recovery |             now              | pg_last_xact_replay_timestamp |    ?column?     \n-------------------+------------------------------+-------------------------------+-----------------\n t                 | 2026-07-01 08:33:48.99106+00 | 2026-07-01 08:33:18.312918+00 | 00:00:30.678142\n(1 row)\n\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "You have ~2 turns left. Make your fix by editing the source with write_file, then call submit_patch (no diff text needed \u2014 the harness reads your edits)."
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_3aLiJLodXRmbsjvICqnXAvTZ",
+        "name": "read_file",
+        "input": {}
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_3aLiJLodXRmbsjvICqnXAvTZ",
+        "is_error": false,
+        "output_preview": "package main\n\nimport (\n\t\"database/sql\"\n\t\"encoding/json\"\n\t\"log\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"sync\"\n\t\"time\"\n\n\t_ \"github.com/lib/pq\"\n)\n\n// readWritePin implements read-after-write consistency: for a short window after\n// a client writes an account, that account's reads are served from the primary\n// so the client reads its own write. Reads outside the window use the replica to\n// offload the primary.\ntype readWritePin struct {\n\tmu  sync.Mutex\n\tttl time.Duration\n\texp map[string]time.Time\n}\n\nfunc newReadWritePin(ttl time.Duration) *readWritePin {\n\treturn &readWritePin{ttl: ttl, exp: make(map[string]time.Time)}\n}\n\nfunc (p *readWritePin) mark(account string) {\n\tp.mu.Lock()\n\tdefer p.mu.Unlock()\n\tp.exp[account] = time.Now().Add(p.ttl)\n}\n\nfunc (p *readWritePin) pinned(account string) bool {\n\tp.mu.Lock()\n\tdefer p.mu.Unlock()\n\texp, ok := p.exp[account]\n\treturn ok && time.Now().Before(exp)\n}\n\ntype server struct {\n\tprimary *sql.DB\n\treplica *sql.DB\n\tpin     *readWritePin\n}\n\ntype depositRequest struct {\n\tAccount string `json:\"account\"`\n\tAmount  int64  `json:\"amount_cents\"`\n}\n\nfunc (s *server) handleDeposit(w http.ResponseWriter, r *http.Request) {\n\tif r.Method != http.MethodPost {\n\t\thttp.Error(w, \"method not allowed\", http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n\tvar req depositRequest\n\tif err := json.NewDecoder(r.Body).Decode(&req); err != nil {\n\t\thttp.Error(w, \"bad json\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif req.Account == \"\" || req.Amount == 0 {\n\t\thttp.Error(w, \"invalid request\", http.StatusBadRequest)\n\t\treturn\n\t}\n\n\tvar balance int64\n\terr := s.primary.QueryRow(\n\t\t\"UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2 RETURNING balance_cents\",\n\t\treq.Amount, req.Account,\n\t).Scan(&balance)\n\tif err != nil {\n\t\thttp.Error(w, \"write failed: \"+err.Error(), http.StatusInternalServerError)\n\t\treturn\n\t}\n\n\t// Client just wrote this account; serve its reads from the primary briefly.\n\ts.pin.mark(req.Account)\n\n\twriteJSON(w, map[string]any{\n\t\t\"account\":       req.Account,\n\t\t\"balan"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_call",
+        "id": "call_lz8sdZvag1tSeFyIKTLxONYf",
+        "name": "write_file",
+        "input": {}
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "content": [
+      {
+        "type": "tool_result",
+        "id": "call_lz8sdZvag1tSeFyIKTLxONYf",
+        "is_error": false,
+        "output_preview": "wrote C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\.grade-workspaces\\agent-btvtz5b9\\src\\ledger-api\\main.go"
+      }
+    ]
+  }
+]

@@ -21,9 +21,34 @@ tier2_chaos_trace.jsonl
 
 # Ephemeral patch workspaces (grade_patch)
 archetype-a/.grade-workspaces/
+archetype-d-stale-read/.grade-workspaces/
 archetype-a/live_agent_runs/
 .venv-wsl/
+
+# Internal build plan (local)
 agent-dsbench-phased-build-plan (1).md
-archetype-a/phase_*_report.md
+
+# --- Reports and phase narratives (working docs; not published) ---
+/phase_*_report*.md
+/PRE_PHASE*.md
+/PHASE*.md
+/reports/
+
+# Explicit phase docs requested for ignore
+/PHASE3_CONSTRAINTS.md
+/PHASE4_CONSTRAINTS.md
+/PRE_PHASE5.md
+
+archetype-a/phase_*_report*.md
 archetype-a/PHASE*.md
 archetype-a/patches/BANDAID_CORPUS.md
+archetype-a/ORACLE_SEMANTICS.md
+archetype-a/ARCHETYPE_D_DESIGN.md
+archetype-a/STALE_READ_DESIGN.md
+
+archetype-d-stale-read/PHASE*.md
+archetype-d-stale-read/**/*_DIFF.md
+
+# PDFs — keep only the canonical final research report
+*.pdf
+!archetype-d-stale-read/GordianBench_Final_Research_Report.pdf

@@ -1,0 +1,11 @@
+# Band-aid: bump the read-after-write pin TTL, treating the bug as bounded
+# replication lag (H-A). Reuses the broken image; only the TTL env changes.
+# Must FAIL Tier 2: under a sustained partition the replica never catches up, so
+# a read after ANY finite TTL still serves the frozen (stale) replica value.
+services:
+  ledger-api:
+    image: archetype-d-stale-read-ledger-api:broken
+    build:
+      context: ./src/ledger-api
+    environment:
+      PIN_TTL_MS: "5000"

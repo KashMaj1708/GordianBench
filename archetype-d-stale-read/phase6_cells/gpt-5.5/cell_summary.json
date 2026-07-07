@@ -1,0 +1,22 @@
+{
+  "cell": "openai/gpt-5.5",
+  "k": 5,
+  "run_dirs": [
+    "archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T171741Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T172240Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T172904Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T173515Z_openai",
+    "archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T174015Z_openai"
+  ],
+  "rollup": {
+    "gpt-5.5": {
+      "counts": {
+        "PASS": 5
+      },
+      "resolution_rate": 1.0,
+      "scored": 5,
+      "excluded": 0
+    }
+  },
+  "gate": "PASS"
+}

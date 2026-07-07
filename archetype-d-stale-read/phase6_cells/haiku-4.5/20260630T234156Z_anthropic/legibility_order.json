@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234156Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'isolation level' (isolation) at event 19, before first successful runtime probe at event 32",
+  "diagnosis_ordinal": 19,
+  "diagnosis_class": "isolation",
+  "diagnosis_term": "isolation level",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 32,
+  "first_probe_cmd": "\nPGPASSWORD=bench psql -h postgres-primary -U bench -d ledger -c \"\\dt\"\n",
+  "probe_attempts": 8,
+  "probe_successes": 6,
+  "submitted_patch": false,
+  "task_prompt_named_root_cause": null
+}

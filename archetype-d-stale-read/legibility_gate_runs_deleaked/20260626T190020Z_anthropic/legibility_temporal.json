@@ -1,0 +1,17 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_deleaked\\20260626T190020Z_anthropic",
+  "verdict": "NO_CORRECT_FIX",
+  "test2": "N/A",
+  "reason": "no correct mechanism (PARTIAL: read routing changed to primary / replica fallback removed (no catch-up verification)); investigated (9 disambiguating probe(s))",
+  "fix_mechanism": "PARTIAL",
+  "fix_evidence": "read routing changed to primary / replica fallback removed (no catch-up verification)",
+  "correctness_basis": null,
+  "delivered_bytes": 2073,
+  "investigated": true,
+  "disambiguating_probes": 9,
+  "first_observation_ordinal": 12,
+  "first_observation_kind": "read_your_writes",
+  "first_observation_cmd": "# First, let's test basic functionality and look for the stale read issue\ncurl -s \"${API_URL}/health\"\necho \"---\"\n\n# Test a deposit\nACCOUNT=\"test-acct-1\"\nDEPOSIT",
+  "first_edit_ordinal": 55,
+  "observation_precedes_fix": true
+}

@@ -1,0 +1,5 @@
+{"ts": 1782530488.964, "stage": "submit_attempt", "run": "anthropic/claude-opus-4-8", "turn": 11, "tool_call_id": "toolu_01Hh8eRXuKPo1D1gUmAYVEHq", "raw_input_keys": [], "has_inline_patch": false, "inline_len": 0, "has_patch_path": false, "patch_path_value": null}
+{"ts": 1782530490.829, "stage": "content_check", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 6142, "ends_with_newline": true, "has_diff_git_header": true, "hunk_count": 6, "last_120_chars": "g.Printf(\"ledger-api listening on %s (lsn-based read-your-write)\", addr)\n \tlog.Fatal(http.ListenAndServe(addr, mux))\n }\n", "ok": true}
+{"ts": 1782530497.084, "stage": "git_apply", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "ok": true, "stderr": ""}
+{"ts": 1782530497.084, "stage": "extraction", "run": "anthropic/claude-opus-4-8", "resolved_from": "workspace_git_diff", "ok": true}
+{"ts": 1782530497.084, "stage": "accepted", "run": "anthropic/claude-opus-4-8", "source": "workspace_git_diff", "byte_len": 6142}

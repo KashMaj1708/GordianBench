@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\legibility_gate_runs_smoke_gpt55\\20260629T072810Z_openai",
+  "verdict": "NO_DIAGNOSIS",
+  "test2": "N/A",
+  "reason": "no named root cause in assistant text",
+  "diagnosis_ordinal": null,
+  "diagnosis_class": null,
+  "diagnosis_term": null,
+  "diagnosis_role": null,
+  "first_probe_ordinal": 6,
+  "first_probe_cmd": "python3 - <<'PY'\nimport os, requests, time, json, random\napi=os.environ['API_URL']\nacct='acct-1'\n# get initial\nr=requests.get(api+'/balance', params={'account':acct}, timeout=2); print('initial', r.text.strip())\nold=None\nbad=0\nfor i in range(50):\n    d=requests.post(api+'/deposit', json={'account':acct,'amount_cents':1}, timeout=2)\n    if d.status_code!=200:\n        print('deposit fail',d.status_code,d.text); break\n    dj=d.json(); expected=dj['balance_cents']\n    g=requests.get(api+'/balance', params={'account':acct}, timeout=2)\n    if g.status_code!=200:\n        print('get fail',g.status_code,g.text); continue\n    gj=g.json()\n    if gj['balance_cents']<expected:\n        bad+=1\n        print('BAD',i,'dep',dj,'get',gj)\n    elif i<5:\n        print('ok',i,dj,gj)\nprint('bad',bad)\nPY",
+  "probe_attempts": 3,
+  "probe_successes": 3,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

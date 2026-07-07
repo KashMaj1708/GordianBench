@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\haiku-4.5\\20260630T234529Z_anthropic",
+  "verdict": "SOURCE_LEGIBLE",
+  "test2": "FAIL",
+  "reason": "named 'race condition' (race) at event 7, before first successful runtime probe at event 21",
+  "diagnosis_ordinal": 7,
+  "diagnosis_class": "race",
+  "diagnosis_term": "race condition",
+  "diagnosis_role": "assistant",
+  "first_probe_ordinal": 21,
+  "first_probe_cmd": "\nPGPASSWORD=bench psql -h postgres-primary -U bench -d ledger -c \"CREATE TABLE IF NOT EXISTS accounts (id VARCHAR PRIMARY KEY, balance_cents BIGINT DEFAULT 0);\"\n",
+  "probe_attempts": 6,
+  "probe_successes": 5,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}

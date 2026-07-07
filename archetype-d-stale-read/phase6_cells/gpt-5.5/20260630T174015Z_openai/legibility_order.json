@@ -1,0 +1,16 @@
+{
+  "run_dir": "C:\\Users\\kashy\\Desktop\\GordianBench\\GordianBench\\archetype-d-stale-read\\phase6_cells\\gpt-5.5\\20260630T174015Z_openai",
+  "verdict": "NO_DIAGNOSIS",
+  "test2": "N/A",
+  "reason": "no named root cause in assistant text",
+  "diagnosis_ordinal": null,
+  "diagnosis_class": null,
+  "diagnosis_term": null,
+  "diagnosis_role": null,
+  "first_probe_ordinal": 6,
+  "first_probe_cmd": "python3 - <<'PY'\nimport os, requests, time, random\napi=os.environ['API_URL']\nacct='acct-1'\n# get initial\nprint(requests.get(api+'/balance', params={'account':acct}).text)\nfor i in range(20):\n    amt=random.randint(1,3)\n    r=requests.post(api+'/deposit', json={'account':acct,'amount_cents':amt})\n    print('dep', r.status_code, r.text.strip())\n    d=r.json()['balance_cents'] if r.ok else None\n    # immediate\n    g=requests.get(api+'/balance', params={'account':acct})\n    print('get', g.status_code, g.text.strip(), 'expected>=', d)\n    if g.ok and g.json()['balance_cents'] < d: break\n    time.sleep(0.05)\nPY",
+  "probe_attempts": 2,
+  "probe_successes": 2,
+  "submitted_patch": true,
+  "task_prompt_named_root_cause": null
+}
