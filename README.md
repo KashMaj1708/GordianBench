@@ -1,72 +1,32 @@
 # GordianBench
 
-A distributed-systems agent debugging benchmark with a **chaos-validated oracle** that distinguishes real invariant-preserving fixes from timing-luck band-aids. Scoring uses oracle grades only — classifier labels are diagnostic, never headline metrics.
+A **chaos-graded benchmark for agentic distributed-systems debugging** that rejects timing-luck fixes — patches must preserve read-your-writes under a recovering-lag oracle, not just pass a calm-path test.
 
-**Published result:** [`archetype-d-stale-read/GordianBench_Final_Research_Report.pdf`](archetype-d-stale-read/GordianBench_Final_Research_Report.pdf)
+## Headline finding
 
----
+On one stale-read bug under identical frozen conditions, **repair mechanism predicts oracle success better than vendor tier**: a mid-tier model (**GPT-4.1**, 40%) tied a frontier model (**Claude Opus 4.8**, 40%), while the other frontier model (**GPT-5.5**) saturated at 100%. Opus's LSN-shaped failures trace to **one WAL-ordering error** — capturing `pg_current_wal_lsn()` inside the writing `UPDATE … RETURNING` (pre-commit watermark) instead of after commit.
 
-## What this repo is
+## Results
 
-GordianBench measures whether LLM agents can **investigate, patch, and survive** bugs in replicated / laggy systems — not whether they can make a single calm-path test pass.
-
-The v1 focus is **Archetype D (stale-read-after-failover)**: a ledger API that must preserve read-your-writes when a Postgres replica lags behind the primary. Patches are graded under a **recovering-lag** chaos profile (20s downstream toxic, 10 trials per patch).
-
-The benchmark ships:
-
-- An **agent loop** with multi-vendor providers (`agent/`)
-- A **grading harness** with build checks and oracle rollout (`harness/`)
-- A **frozen Phase 6 cell executor** (`scripts/run_phase6_cell.py`)
-- A containerized stale-read topology (`archetype-d-stale-read/`)
-
-Working phase reports and intermediate writeups live locally and are gitignored; the PDF above is the canonical published artifact.
-
----
-
-## Headline finding (Phase 6)
-
-Under identical frozen config (k=5, shared prompt, build_check on, oracle-graded), the stale-read archetype produced a **three-step capability gradient** on the same bug:
+Five cells, k=5 each, oracle-graded under recovering-lag (20s downstream toxic, 10 trials per patch):
 
 | Model | Tier | Resolution |
 |-------|------|------------|
 | Claude Haiku 4.5 | Mid-tier | 0% (0/5) |
 | Gemini 2.5 Pro | Mid-tier | 0% (0/5) |
-| GPT-4.1 | Mid-tier | 40% (2/5) |
-| Claude Opus 4.8 | Frontier | 40% (2/5) |
+| **GPT-4.1** | Mid-tier | **40% (2/5)** |
+| **Claude Opus 4.8** | Frontier | **40% (2/5)** |
 | GPT-5.5 | Frontier | 100% (5/5) |
 
-**Mechanistic contribution:** the ~60-point gap between GPT-5.5 and Opus on LSN-shaped attempts is explained by one transaction-ordering detail — capturing `pg_current_wal_lsn()` **after commit** vs **inside** the writing `UPDATE … RETURNING` (P3 pre-commit watermark). Patch inspection confirms this on both sides.
+![Oracle resolution rates by model](archetype-d-stale-read/fig2_rates.png)
 
-**Scope:** this is a finding about **this archetype and this mechanism**, not a general vendor leaderboard. GPT-5.5 saturated the task (5/5); harder archetypes are needed to discriminate above that level.
+Canonical numbers: [`archetype-d-stale-read/phase6_cells/phase6_headline_rollup.json`](archetype-d-stale-read/phase6_cells/phase6_headline_rollup.json)
 
----
-
-## Repository layout
-
-```
-agent/                  Agent loop, tools, multi-vendor providers
-harness/                Grading, workspace, patch apply, rollup
-scripts/                Gate runners, cell executor, validators
-archetype-a/            Archetype A (idempotent retry) — Phase 4 foundations
-archetype-d-stale-read/ Stale-read topology, oracle, Phase 6 cell artifacts
-```
-
-Key scripts:
-
-| Script | Purpose |
-|--------|---------|
-| `scripts/run_phase6_cell.py` | Run one model cell (k gate runs → oracle → rollup) |
-| `scripts/run_stale_read_gate.py` | Single stale-read gate trajectory |
-| `scripts/grade_stale_read_patch.py` | Tier-2 oracle grading for a run directory |
-| `scripts/run_phase4_gate.py` | Phase 4 engineering exit gate |
-| `scripts/generate_final_report_pdf.py` | Regenerate paper-style PDF from rollup data |
-
-Phase 6 per-cell artifacts: `archetype-d-stale-read/phase6_cells/{model}/`  
-Headline rollup: `archetype-d-stale-read/phase6_cells/phase6_headline_rollup.json`
+**Full analysis, mechanistic breakdown, and methodology:** [`archetype-d-stale-read/GordianBench_Final_Research_Report.pdf`](archetype-d-stale-read/GordianBench_Final_Research_Report.pdf)
 
 ---
 
-## Setup
+## Reproduce
 
 **Requirements:** Python 3.10+, Docker running.
 
@@ -76,21 +36,22 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Copy `.env.example` patterns into `.env` and set API keys for providers you plan to run:
+Set API keys in `.env` for the provider you plan to run (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`).
 
-```
-ANTHROPIC_API_KEY=...
-OPENAI_API_KEY=...
-GOOGLE_API_KEY=...   # Gemini
-```
+### Frozen evaluation config
 
-On native Windows, full harness development is easiest under **WSL2** (see `requirements.txt` note). Phase 6 stale-read cells have been run on Windows with Docker Desktop.
+| Parameter | Value |
+|-----------|-------|
+| Archetype | `archetype-d-stale-read` (stale-read after replica lag) |
+| Chaos | recovering-lag, 20,000 ms downstream toxic |
+| Runs per model (k) | 5 |
+| Turn budget | 20 |
+| build_check | ON (max 2 retries) |
+| Oracle | recovering-lag profile, 10 trials per patch |
+| Prompt | Shared `SYSTEM` / `USER` in `scripts/run_stale_read_gate.py` |
+| Scoring | `oracle_grade.json` only — classifier labels are diagnostic, never headline metrics |
 
----
-
-## Running a Phase 6 cell
-
-Frozen config is documented in `PRE_PHASE6.md` (local, gitignored). Example:
+### Run one model cell
 
 ```powershell
 .venv\Scripts\python.exe scripts\run_phase6_cell.py `
@@ -98,31 +59,45 @@ Frozen config is documented in `PRE_PHASE6.md` (local, gitignored). Example:
   --log-dir archetype-d-stale-read\phase6_cells\gpt-5.5
 ```
 
-Scoring consumes `oracle_grade.json` per run via `harness/rollup.py`. Resolution rate = `PASS / scored runs`.
+This runs k gate trajectories → oracle-grades each delivered patch → writes `cell_summary.json`.
 
----
+### Where artifacts land
 
-## Methodological commitments
-
-- **Oracle-only scoring** — classifier agreement reported separately, never used for rates
-- **Frozen config** across cells — any pipeline change invalidates prior cells
-- **No capability re-runs** — only infra / delivery-corruption failures are re-run eligible
-- **Held-out models stated explicitly** — e.g. Gemini 3.1 Pro excluded for delivery non-comparability under the shared prompt
-- **Per-cell rates for claims** — pooled cross-tier rates are not headline metrics
-
----
-
-## Regenerating the final PDF
-
-```powershell
-.venv\Scripts\python.exe scripts\generate_final_report_pdf.py `
-  --out archetype-d-stale-read\GordianBench_Final_Research_Report.pdf
+```
+archetype-d-stale-read/phase6_cells/{model}/
+  {timestamp}_{provider}/
+    trajectory.json       agent run
+    model_patch.diff      submitted patch
+    meta.json             delivery metadata (patch_bytes, re-applies, build)
+    oracle_grade.json     PASS / FAIL verdict (authoritative score)
+    patch_pipeline.jsonl  delivery-stage instrumentation
 ```
 
-Requires `matplotlib` (in `requirements.txt`).
+Resolution rate = `PASS / scored runs` via [`harness/rollup.py`](harness/rollup.py). Runs with delivery corruption (`patch_reapplies is False`) are excluded from the denominator and flagged for re-run.
+
+### Grade a single run manually
+
+```powershell
+.venv\Scripts\python.exe scripts\grade_stale_read_patch.py `
+  archetype-d-stale-read\phase6_cells\gpt-5.5\20260630T172240Z_openai `
+  --profile lag --lag-ms 20000 --trials 10
+```
+
+Writes `oracle_grade.json` in the run directory.
 
 ---
 
-## License
+**Scope:** This is a result on **one archetype** (stale-read under recovering-lag) with **k=5 per model**; it is **not** a general model ranking.
 
-Add license text here if applicable.
+---
+
+## Repository layout
+
+| Path | Purpose |
+|------|---------|
+| `agent/` | Agent loop, tools, multi-vendor providers |
+| `harness/` | Grading, workspace, patch apply, rollup |
+| `scripts/run_phase6_cell.py` | Run one model evaluation cell |
+| `scripts/run_stale_read_gate.py` | Single gate trajectory |
+| `scripts/grade_stale_read_patch.py` | Oracle-grade one run |
+| `archetype-d-stale-read/` | Stale-read topology, evaluation artifacts, final report |
